@@ -1,0 +1,15 @@
+# Pastas geradas pelo Gradle e IntelliJ
+.gradle/
+.idea/
+build/
+out/
+
+# Bases de dados e logs
+*.mv.db
+*.trace.db
+*.log
+*.tmp
+
+# Binários
+*.class
+*.jar
