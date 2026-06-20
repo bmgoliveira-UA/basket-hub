@@ -3,48 +3,72 @@
  */
 
 document.addEventListener("DOMContentLoaded", () => {
-    const perfil = localStorage.getItem('perfil');
+    const role = localStorage.getItem('role');
 
-    // Se não houver perfil, redireciona para a página de seleção
-    if (!perfil && window.location.pathname !== '/') {
+    // Se não houver role, redireciona para a página de seleção
+    if (!role && window.location.pathname !== '/' && !window.location.pathname.endsWith('index.html')) {
         window.location.href = '/';
         return;
     }
 
     // Carrega o dashboard por defeito
-    switchTab('dashboard');
+    if (role) {
+        switchTab('dashboard');
+        aplicarFiltroDeAcesso();
+    }
 });
 
-async function aplicarFiltroDeAcesso() {
-    const perfil = localStorage.getItem('perfil');
-    if (!perfil) return;
+function aplicarFiltroDeAcesso() {
+    const role = localStorage.getItem('role');
+    if (!role) return;
 
-    // Remove o display: none apenas para os elementos autorizados
-    const elementosAutorizados = document.querySelectorAll(`.role-${perfil.toLowerCase()}`);
-    elementosAutorizados.forEach(el => {
-        el.style.display = ''; // Limpa o display:none do CSS
+    // 1. Nova lógica de controlo via atributo data-roles
+    document.querySelectorAll('[data-roles]').forEach(el => {
+        const allowedRoles = el.getAttribute('data-roles').split(',').map(r => r.trim().toUpperCase());
+        if (allowedRoles.includes(role.toUpperCase())) {
+            el.style.display = '';
+        } else {
+            el.style.display = 'none';
+        }
+    });
+
+    // 2. Mantém compatibilidade com as tuas classes role-XXX injetadas dinamicamente nos templates
+    document.querySelectorAll('[class*="role-"]').forEach(el => {
+        const classes = Array.from(el.classList);
+        const ehAutorizado = classes.some(c => c.toUpperCase() === `ROLE-${role.toUpperCase()}`);
+        if(ehAutorizado) {
+            el.style.display = '';
+        } else {
+            el.style.display = 'none';
+        }
     });
 }
 
 const viewContainer = document.getElementById('view-container');
 const viewTitle = document.getElementById('current-view-title');
 
-// 1. Motor de Comunicação com Validação de Formato de Resposta (Anti-HTML Craches)
+// 1. Motor de Comunicação com Validação de Formato de Resposta
 async function apiCall(url, method = 'GET', data = null) {
+    const role = localStorage.getItem('role') || 'JOGADOR';
+
+    // Injeta a role automaticamente na URL para garantir segurança no backend
+    const separator = url.includes('?') ? '&' : '?';
+    let cleanUrl = url.replace(/([?&])perfil=[^&]*(&|$)/, '$1').replace(/&$/, '').replace(/\?$/, '');
+    const finalUrl = `${cleanUrl}${separator}role=${role}`;
+
     const config = {
         method: method,
-        headers:
-            {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
     };
     if (data && (method === 'POST' || method === 'PUT')) {
         config.body = JSON.stringify(data);
     }
 
     try {
-        const response = await fetch(url, config);
+        const response = await fetch(finalUrl, config);
         const contentType = response.headers.get("content-type") || "";
 
         if (!response.ok) {
@@ -53,7 +77,7 @@ async function apiCall(url, method = 'GET', data = null) {
         }
 
         if (contentType.includes("text/html")) {
-            throw new Error("O servidor divulveu uma página HTML em vez de dados JSON. Verifique se o endpoint existe no Ktor.");
+            throw new Error("O servidor devolveu uma página HTML em vez de dados JSON. Verifique se o endpoint existe no Ktor.");
         }
 
         if (response.status === 204 || response.headers.get('content-length') === '0') {
@@ -84,12 +108,12 @@ const MatrizAcesso = {
 };
 
 async function switchTab(tab) {
-    const perfil = localStorage.getItem('perfil') || 'JOGADOR';
+    const role = localStorage.getItem('role') || 'JOGADOR';
 
     // 1. Verificação de segurança (Matriz de Acesso)
-    if (!MatrizAcesso[perfil] || !MatrizAcesso[perfil].includes(tab)) {
-        console.warn(`Tentativa de acesso negada: ${perfil} -> ${tab}`);
-        alert("Acesso negado para este perfil!");
+    if (!MatrizAcesso[role] || !MatrizAcesso[role].includes(tab)) {
+        console.warn(`Tentativa de acesso negada: ${role} -> ${tab}`);
+        alert("Acesso negado para esta role!");
         return;
     }
 
@@ -97,7 +121,7 @@ async function switchTab(tab) {
         // 2. Atualiza o título visível na barra superior
         document.getElementById('current-view-title').innerText = tab.charAt(0).toUpperCase() + tab.slice(1);
 
-        // 3. Orquestrador Inteligente: Executa a função JS correta para renderizar o ecrã
+        // 3. Orquestrador Inteligente
         switch (tab) {
             case 'dashboard':
                 loadDashboard();
@@ -133,7 +157,7 @@ async function switchTab(tab) {
                 console.error("Módulo não mapeado:", tab);
         }
 
-        // 4. Aplica filtros visuais de permissão
+        // 4. Aplica filtros visuais de permissão aos elementos carregados
         aplicarFiltroDeAcesso();
 
         // 5. Atualiza o estado visual ativo dos botões da sidebar
@@ -151,7 +175,7 @@ async function switchTab(tab) {
     }
 }
 
-// 3. Carregamento de Módulos com Seletores de Nomes (Sem IDsmanuais)
+// 3. Carregamento de Módulos com Seletores de Nomes (Sem IDs manuais)
 
 function loadDashboard() {
     viewTitle.innerText = "Dashboard";
@@ -171,8 +195,7 @@ async function loadJogadores() {
     viewTitle.innerText = "Jogadores";
     showLoader();
     try {
-        const perfil = localStorage.getItem('perfil');
-        const dados = await apiCall(`/jogadores?perfil=${perfil}`);
+        const dados = await apiCall(`/jogadores`);
         const rows = dados.map(j => `
             <tr>
                 <td>${j.id}</td>
@@ -217,7 +240,7 @@ async function loadEquipas() {
                 <td><strong>${e.nome}</strong></td>
                 <td><span class="badge badge-primary">${e.sigla}</span></td>
                 <td>${e.localidade}</td>
-                <td class="actions-cell">
+                <td class="actions-cell role-administrador role-organizador">
                     <button class="btn-icon delete" onclick="deleteItem('/equipas/${e.id}', loadEquipas)"><i class="fa-solid fa-trash"></i></button>
                 </td>
             </tr>
@@ -226,7 +249,7 @@ async function loadEquipas() {
         viewContainer.innerHTML = `
             <div class="section-card">
                 <div class="section-header"><h2>Registo de Clubes</h2></div>
-                <form id="form-equipa" onsubmit="submitFormEquipa(event)" style="margin-bottom:24px;">
+                <form id="form-equipa" onsubmit="submitFormEquipa(event)" class="role-administrador role-organizador" style="margin-bottom:24px;">
                     <div class="flex-form-row">
                         <div class="modal-form-group"><label>Nome da Equipa</label><input type="text" id="e-nome" required></div>
                         <div class="modal-form-group"><label>Sigla Oficial</label><input type="text" id="e-sigla" required></div>
@@ -236,7 +259,7 @@ async function loadEquipas() {
                 </form>
                 <div class="table-responsive">
                     <table class="table-hub">
-                        <thead><tr><th>ID</th><th>Nome</th><th>Sigla</th><th>Localidade</th><th>Ações</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Nome</th><th>Sigla</th><th>Localidade</th><th class="role-administrador role-organizador">Ações</th></tr></thead>
                         <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">Nenhuma equipa listada.</td></tr>'}</tbody>
                     </table>
                 </div>
@@ -248,7 +271,6 @@ async function loadEventos() {
     viewTitle.innerText = "Eventos";
     showLoader();
     try {
-        // Faz chamadas em paralelo para carregar as dependências de nomes reais
         const [dados, pavilhoes, organizadores] = await Promise.all([
             apiCall('/eventos'),
             apiCall('/pavilhoes'),
@@ -268,7 +290,7 @@ async function loadEventos() {
                 <td>${ev.data}</td>
                 <td>${pav}</td>
                 <td>${org}</td>
-                <td class="actions-cell">
+                <td class="actions-cell role-administrador role-organizador">
                     <button class="btn" style="padding:6px 12px; font-size:12px;" onclick="actionPost('/eventos/${ev.id}/agendamento', loadEventos)"><i class="fa-solid fa-wand-magic-sparkles"></i> Sorteio</button>
                     <button class="btn-icon delete" onclick="deleteItem('/eventos/${ev.id}', loadEventos)"><i class="fa-solid fa-trash"></i></button>
                 </td>
@@ -278,7 +300,7 @@ async function loadEventos() {
         viewContainer.innerHTML = `
             <div class="section-card">
                 <div class="section-header"><h2>Gestão de Torneios e Competições</h2></div>
-                <form id="form-evento" onsubmit="submitFormEvento(event)" style="margin-bottom:24px;">
+                <form id="form-evento" onsubmit="submitFormEvento(event)" class="role-administrador role-organizador" style="margin-bottom:24px;">
                     <div class="flex-form-row">
                         <div class="modal-form-group"><label>Nome do Evento</label><input type="text" id="ev-nome" required></div>
                         <div class="modal-form-group"><label>Data</label><input type="text" id="ev-data" placeholder="AAAA-MM-DD" required></div>
@@ -299,7 +321,7 @@ async function loadEventos() {
                 </form>
                 <div class="table-responsive">
                     <table class="table-hub">
-                        <thead><tr><th>ID</th><th>Nome</th><th>Data</th><th>Pavilhão</th><th>Organizador</th><th>Ações</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Nome</th><th>Data</th><th>Pavilhão</th><th>Organizador</th><th class="role-administrador role-organizador">Ações</th></tr></thead>
                         <tbody>${rows || '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">Nenhum evento agendado.</td></tr>'}</tbody>
                     </table>
                 </div>
@@ -339,7 +361,7 @@ async function loadJogos() {
                 <td><strong>${casaNome}</strong> vs <strong>${foraNome}</strong></td>
                 <td><span class="badge" style="font-weight:700;">${j.pontosCasa} - ${j.pontosFora}</span></td>
                 <td>${j.dataHora}</td>
-                <td class="actions-cell">
+                <td class="actions-cell role-administrador role-organizador">
                     <button class="btn-icon delete" onclick="deleteItem('/jogos/${j.id}', loadJogos)"><i class="fa-solid fa-trash"></i></button>
                 </td>
             </tr>`;
@@ -348,7 +370,7 @@ async function loadJogos() {
         viewContainer.innerHTML = `
             <div class="section-card">
                 <div class="section-header"><h2>Resultados e Encontros Oficiais</h2></div>
-                <form id="form-jogo" onsubmit="submitFormJogo(event)" style="margin-bottom:24px;">
+                <form id="form-jogo" onsubmit="submitFormJogo(event)" class="role-administrador role-organizador" style="margin-bottom:24px;">
                     <div class="flex-form-row">
                         <div class="modal-form-group"><label>Associação ao Evento</label><select id="jg-evento">${optEventos}</select></div>
                         <div class="modal-form-group"><label>Ronda Número</label><input type="number" id="jg-ronda" value="1" required></div>
@@ -365,7 +387,7 @@ async function loadJogos() {
                 </form>
                 <div class="table-responsive">
                     <table class="table-hub">
-                        <thead><tr><th>ID</th><th>Evento</th><th>Ronda</th><th>Encontro</th><th>Resultado</th><th>Info</th><th>Ações</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Evento</th><th>Ronda</th><th>Encontro</th><th>Resultado</th><th>Info</th><th class="role-administrador role-organizador">Ações</th></tr></thead>
                         <tbody>${rows || '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">Nenhum jogo registado neste torneio.</td></tr>'}</tbody>
                     </table>
                 </div>
@@ -594,8 +616,7 @@ async function loadClassificacoes() {
 
 async function submitFormJogador(e) {
     e.preventDefault();
-    const perfil = localStorage.getItem('perfil');
-    await apiCall(`/jogadores?perfil=${perfil}`, 'POST', {
+    await apiCall(`/jogadores`, 'POST', {
         nome: document.getElementById('j-nome').value,
         posicao: document.getElementById('j-posicao').value,
         n_camisola: parseInt(document.getElementById('j-camisola').value, 10)
@@ -633,7 +654,6 @@ async function submitFormEvento(e) {
 async function submitFormJogo(e) {
     e.preventDefault();
 
-    // Obter valores dos inputs
     const eventoId = parseInt(document.getElementById('jg-evento').value, 10);
     const ronda = parseInt(document.getElementById('jg-ronda').value, 10);
     const casaId = parseInt(document.getElementById('jg-casa').value, 10);
@@ -644,35 +664,23 @@ async function submitFormJogo(e) {
     const pontosFora = parseInt(document.getElementById('jg-ptsfora').value, 10);
     const dataHora = document.getElementById('jg-datahora').value;
 
-    // 1. Validação: Impedir o mesmo clube como casa e fora
     if (foraId !== null && casaId === foraId) {
         alert("Erro: A equipa da casa não pode ser a mesma equipa visitante.");
         return;
     }
 
-    // 2. Validação: Impedir empates (Regra de Basquetebol)
-    // Nota: Apenas validamos se a equipa de fora existir (não for 'bye')
     if (foraId !== null && pontosCasa === pontosFora) {
         alert("Erro: O resultado não pode terminar empatado. Verifique os pontos.");
         return;
     }
 
-    // Envio para a API
     try {
         await apiCall('/jogos', 'POST', {
-            eventoId,
-            ronda,
-            equipaCasaId: casaId,
-            equipaForaId: foraId,
-            pavilhaoId,
-            pontosCasa,
-            pontosFora,
-            dataHora
+            eventoId, ronda, equipaCasaId: casaId, equipaForaId: foraId,
+            pavilhaoId, pontosCasa, pontosFora, dataHora
         });
         loadJogos();
-    } catch (err) {
-        // O apiCall já dispara o alert, aqui apenas paramos a execução
-    }
+    } catch (err) {}
 }
 
 async function submitFormPavilhao(e) {
@@ -722,32 +730,17 @@ async function submitFormInscricao(e) {
 
 async function deleteItem(url, callback) {
     if (confirm('Deseja realmente eliminar este item permanentemente do sistema?')) {
-        await fetch(url, { method: 'DELETE' });
+        await apiCall(url, 'DELETE');
         callback();
     }
 }
 
 async function actionPost(url, callback) {
-    const perfil = localStorage.getItem('perfil');
-
     try {
-        // Combinamos a lógica de envio com o parâmetro de perfil
-        const response = await fetch(`${url}?perfil=${perfil}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (!response.ok) {
-            // Tenta ler a mensagem de erro do servidor
-            const errorMsg = await response.text();
-            throw new Error(errorMsg || "Falha ao realizar a operação");
-        }
-
+        await apiCall(url, 'POST');
         alert("Operação realizada com sucesso!");
         callback();
-
     } catch (err) {
         console.error("Erro na operação:", err);
-        alert("Erro na operação de agendamento: " + err.message);
     }
 }

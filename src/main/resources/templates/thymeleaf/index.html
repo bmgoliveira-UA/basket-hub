@@ -1,60 +1,102 @@
 <!DOCTYPE html>
-<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BasketHub</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <title>BasketHub | Seleção de Perfil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="/static/main.css">
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --primary: #0284c7;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --bg-card: #ffffff;
+            --border-color: #e2e8f0;
+            --radius: 12px;
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --transition: all 0.2s ease;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        h1 { margin-bottom: 2rem; }
+
+        .role-grid {
+            display: flex;
+            gap: 20px;
+            width: 90%;
+            max-width: 900px;
+            justify-content: center;
+            vertical-align: center;
+        }
+
+        .role-card {
+            width: 20%;
+            min-width: 180px;
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-md);
+        }
+
+        .role-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        .role-card i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
-<body data-perfil="">
-<div class="app-container">
+<body>
 
-    <aside class="sidebar">
-        <div class="brand">
-            <i class="fa-solid fa-basketball"></i>
-            <span>BasketHub</span>
-        </div>
-        <nav class="nav-menu" id="sidebar-menu">
-            <button class="nav-link" data-target="dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></button>
-            <button class="nav-link" data-target="jogadores" onclick="switchTab('jogadores')" data-roles="ADMINISTRADOR"><i class="fa-solid fa-user"></i><span>Jogadores</span></button>
-            <button class="nav-link" data-target="equipas" onclick="switchTab('equipas')" data-roles="ADMINISTRADOR,JOGADOR"><i class="fa-solid fa-shield-halved"></i><span>Equipas</span></button>
-            <button class="nav-link" data-target="eventos" onclick="switchTab('eventos')" data-roles="ADMINISTRADOR,ORGANIZADOR,PATROCINADOR"><i class="fa-solid fa-calendar-days"></i><span>Eventos</span></button>
-            <button class="nav-link" data-target="jogos" onclick="switchTab('jogos')" data-roles="ADMINISTRADOR,ORGANIZADOR,JOGADOR"><i class="fa-solid fa-trophy"></i><span>Jogos</span></button>
-            <button class="nav-link" data-target="pavilhoes" onclick="switchTab('pavilhoes')" data-roles="ADMINISTRADOR"><i class="fa-solid fa-building"></i><span>Pavilhões</span></button>
-            <button class="nav-link" data-target="organizadores" onclick="switchTab('organizadores')" data-roles="ADMINISTRADOR,ORGANIZADOR"><i class="fa-solid fa-user-tie"></i><span>Organizadores</span></button>
-            <button class="nav-link" data-target="patrocinadores" onclick="switchTab('patrocinadores')" data-roles="ADMINISTRADOR,PATROCINADOR"><i class="fa-solid fa-handshake"></i><span>Patrocinadores</span></button>
-            <button class="nav-link" data-target="inscricoes" onclick="switchTab('inscricoes')" data-roles="ADMINISTRADOR,ORGANIZADOR"><i class="fa-solid fa-file-signature"></i><span>Inscrições</span></button>
-            <button class="nav-link" data-target="classificacoes" onclick="switchTab('classificacoes')" data-roles="ADMINISTRADOR,ORGANIZADOR,JOGADOR"><i class="fa-solid fa-list-ol"></i><span>Classificações</span></button>
-        </nav>
-    </aside>
+<h1>BasketHub</h1>
+<p style="margin-bottom: 30px; color: var(--text-muted);">Selecione o seu perfil de visualização para continuar</p>
 
-    <main class="main-content">
-        <header class="top-bar">
-            <div class="page-title-area"><h1 id="current-view-title">Dashboard</h1></div>
-            <div class="user-profile"><i class="fa-solid fa-circle-user"></i> <span id="user-display">Utilizador</span></div>
-        </header>
-        <div class="content-view" id="view-container"></div>
-    </main>
+<div class="role-grid">
+    <div class="role-card" onclick="entrar('JOGADOR')">
+        <i class="fa-solid fa-person-running"></i>
+        <h3>Jogador</h3>
+    </div>
+    <div class="role-card" onclick="entrar('ORGANIZADOR')">
+        <i class="fa-solid fa-clipboard-list"></i>
+        <h3>Organizador</h3>
+    </div>
+    <div class="role-card" onclick="entrar('PATROCINADOR')">
+        <i class="fa-solid fa-handshake"></i>
+        <h3>Patrocinador</h3>
+    </div>
+    <div class="role-card" onclick="entrar('ADMINISTRADOR')">
+        <i class="fa-solid fa-user-shield"></i>
+        <h3>Administrador</h3>
+    </div>
 </div>
 
 <script>
-    // Inicialização básica de proteção de interface
-    (function() {
-        const perfil = localStorage.getItem('perfil') || 'JOGADOR'; // Default para testes
-        document.body.dataset.perfil = perfil;
-        document.getElementById('user-display').innerText = perfil;
-
-        // Filtra sidebar
-        document.querySelectorAll('#sidebar-menu .nav-link').forEach(btn => {
-            const roles = btn.getAttribute('data-roles');
-            if (roles && !roles.includes(perfil)) {
-                btn.style.display = 'none';
-            }
-        });
-    })();
+    function entrar(role) {
+        localStorage.setItem("role", role);
+        window.location.href = "/dashboard";
+    }
 </script>
-<script src="/static/ui.js"></script>
 </body>
 </html>
