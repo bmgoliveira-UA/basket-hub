@@ -1,6 +1,7 @@
 package com.est.Jogador
 
 import com.est.DBUtils.DBUtils
+import com.est.DBUtils.DatabaseCreation
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
 import io.ktor.server.request.receive
@@ -9,7 +10,7 @@ import io.ktor.server.routing.*
 
 fun Application.Jogadores_Rotas() {
 
-    val jogadorService = JogadorService(DBUtils.database)
+    val jogadorService = DatabaseCreation.JogadorService
 
     routing {
 

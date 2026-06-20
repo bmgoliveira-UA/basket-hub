@@ -5,53 +5,51 @@
     </div>
 
     <nav class="nav-menu">
-        <a href="/" class="nav-link" data-target="dashboard">
+        <button class="nav-link" data-target="dashboard" onclick="switchTab('dashboard')">
             <i class="fa-solid fa-chart-pie"></i> <span>Dashboard</span>
-        </a>
-        <a href="/equipas" class="nav-link" data-target="equipas">
+        </button>
+
+        <button class="nav-link role-administrador role-jogador" data-target="equipas" onclick="switchTab('equipas')">
             <i class="fa-solid fa-shield-halved"></i> <span>Equipas</span>
-        </a>
-        <a href="/jogadores" class="nav-link" data-target="jogadores">
+        </button>
+
+        <button class="nav-link role-administrador" data-target="jogadores" onclick="switchTab('jogadores')">
             <i class="fa-solid fa-users"></i> <span>Jogadores</span>
-        </a>
-        <a href="/eventos" class="nav-link" data-target="eventos">
+        </button>
+
+        <button class="nav-link role-administrador role-organizador role-patrocinador" data-target="eventos" onclick="switchTab('eventos')">
             <i class="fa-solid fa-calendar-days"></i> <span>Eventos</span>
-        </a>
-        <a href="/jogos" class="nav-link" data-target="jogos">
+        </button>
+
+        <button class="nav-link role-administrador role-organizador role-jogador" data-target="jogos" onclick="switchTab('jogos')">
             <i class="fa-solid fa-stopwatch"></i> <span>Jogos</span>
-        </a>
-        <a href="/pavilhoes" class="nav-link" data-target="pavilhoes">
+        </button>
+
+        <button class="nav-link role-administrador" data-target="pavilhoes" onclick="switchTab('pavilhoes')">
             <i class="fa-solid fa-building"></i> <span>Pavilhões</span>
-        </a>
-        <a href="/organizadores" class="nav-link" data-target="organizadores">
+        </button>
+
+        <button class="nav-link role-administrador role-organizador" data-target="organizadores" onclick="switchTab('organizadores')">
             <i class="fa-solid fa-user-tie"></i> <span>Organizadores</span>
-        </a>
-        <a href="/patrocinadores" class="nav-link" data-target="patrocinadores">
+        </button>
+
+        <button class="nav-link role-administrador role-patrocinador" data-target="patrocinadores" onclick="switchTab('patrocinadores')">
             <i class="fa-solid fa-handshake"></i> <span>Patrocinadores</span>
-        </a>
-        <a href="/inscricoes" class="nav-link" data-target="inscricoes">
+        </button>
+
+        <button class="nav-link role-administrador role-organizador" data-target="inscricoes" onclick="switchTab('inscricoes')">
             <i class="fa-solid fa-file-signature"></i> <span>Inscrições</span>
-        </a>
-        <a href="/classificacoes" class="nav-link" data-target="classificacoes">
+        </button>
+
+        <button class="nav-link role-administrador role-organizador role-jogador" data-target="classificacoes" onclick="switchTab('classificacoes')">
             <i class="fa-solid fa-list-ol"></i> <span>Classificações</span>
-        </a>
+        </button>
     </nav>
 
     <script>
+        // Quando a sidebar for carregada, esconde o que não é permitido
         document.addEventListener("DOMContentLoaded", () => {
-            const currentPath = window.location.pathname;
-
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active'); // Limpeza preventiva
-                const linkHref = link.getAttribute('href');
-
-                // Validação inteligente para evitar falsos positivos na raiz do sistema
-                if (linkHref === '/' && currentPath === '/') {
-                    link.classList.add('active');
-                } else if (linkHref !== '/' && (currentPath === linkHref || currentPath.startsWith(linkHref + '/'))) {
-                    link.classList.add('active');
-                }
-            });
+            aplicarFiltroDeAcesso();
         });
     </script>
 </aside>

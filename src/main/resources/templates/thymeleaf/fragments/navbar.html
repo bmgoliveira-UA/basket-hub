@@ -1,9 +1,52 @@
-<header class="top-bar" th:fragment="navbar(title)">
+<header class="top-bar" th:fragment="navbar">
     <div class="page-title-area">
-        <h1 id="current-view-title" th:text="${title}">Dashboard</h1>
+        <h1 id="current-view-title">Dashboard</h1>
     </div>
+
     <div class="user-profile">
-        <i class="fa-solid fa-circle-user"></i>
-        <span>Admin</span>
+        <i class="fa-solid fa-circle-user" style="font-size: 20px; color: var(--text-muted);"></i>
+
+        <div class="select-wrapper" style="min-width: 160px;">
+            <select id="perfilSelector" onchange="alterarPerfil(this.value)" style="padding: 6px 36px 6px 12px; font-size: 13px; font-weight: 600;">
+                <option value="JOGADOR">Jogador</option>
+                <option value="ORGANIZADOR">Organizador</option>
+                <option value="PATROCINADOR">Patrocinador</option>
+                <option value="ADMINISTRADOR">Administrador</option>
+            </select>
+        </div>
     </div>
+
+    <script>
+        // Inicialização imediata ao carregar o fragmento
+        (() => {
+            const perfilAtual = localStorage.getItem('perfil') || 'JOGADOR';
+            localStorage.setItem('perfil', perfilAtual); // Garante que nunca fica null
+
+            const selector = document.getElementById('perfilSelector');
+            if (selector) {
+                selector.value = perfilAtual;
+            }
+        })();
+
+        // Função reativa para mudar o ecossistema de perfil sem dar reload completo
+        async function alterarPerfil(novoPerfil) {
+            localStorage.setItem('perfil', novoPerfil);
+
+            // 1. Re-aplica os filtros visuais do CSS (.role-approved)
+            if (typeof aplicarFiltroDeAcesso === 'function') {
+                aplicarFiltroDeAcesso();
+            }
+
+            // 2. Se estivermos numa tab que faz pedidos à API, recarrega o conteúdo
+            // para trazer os dados permitidos para o novo perfil
+            const activeLink = document.querySelector('.nav-link.active');
+            if (activeLink) {
+                const targetTab = activeLink.getAttribute('data-target');
+                if (typeof switchTab === 'function') {
+                    // Força o switchTab a recarregar a tab atual com o novo contexto
+                    await switchTab(targetTab);
+                }
+            }
+        }
+    </script>
 </header>

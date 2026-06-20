@@ -1,6 +1,7 @@
 package com.est.Inscricao
 
 import com.est.DBUtils.DBUtils
+import com.est.DBUtils.DatabaseCreation
 import io.ktor.server.application.Application
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
@@ -15,7 +16,7 @@ import io.ktor.server.routing.route
 import com.est.Inscricao.*
 
 fun Application.Inscricao_Rotas() {
-    val service = InscricaoService(DBUtils.database)
+    val service = DatabaseCreation.InscricaoService
 
     routing {
             route("/inscricoes") {

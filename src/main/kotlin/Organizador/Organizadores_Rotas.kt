@@ -1,6 +1,7 @@
 package com.est.Organizador
 
 import com.est.DBUtils.DBUtils
+import com.est.DBUtils.DatabaseCreation
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
 import io.ktor.server.request.receive
@@ -8,7 +9,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 
 fun Application.Organizadores_Rotas() {
-    val service = OrganizadorService(DBUtils.database)
+    val service = DatabaseCreation.OrganizadorService
 
     routing {
             post("/organizador") {

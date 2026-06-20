@@ -9,7 +9,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 
 fun Application.Patrocinadores_Rotas() {
-    val service = PatrocinadorService(DBUtils.database)
+    val service = DatabaseCreation.PatrocinadorService
 
     routing {
         route("/patrocinadores") {

@@ -11,7 +11,7 @@ import io.ktor.server.routing.*
 import com.est.Estatisticas.*
 
 fun Application.Estatisticas_Rotas() {
-    val service = EstatisticasService(DBUtils.database)
+    val service = DatabaseCreation.EstatisticasService
 
     routing {
         route("/estatisticas") {

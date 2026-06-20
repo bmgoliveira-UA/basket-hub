@@ -7,6 +7,8 @@
     --text-light: #f8fafc;
     --primary: #0284c7;
     --primary-hover: #0369a1;
+    --secondary: #1e293b;
+    --secondary-hover: #0f172a;
     --border-color: #e2e8f0;
     --success: #10b981;
     --danger: #ef4444;
@@ -23,6 +25,14 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+/*
+   Controlo de Acesso Nativo por CSS (Anti-Flicker)
+   Esconde tudo o que tem prefixo 'role-' por padrão, exceto se receber aprovação do ui.js
+*/
+[class*="role-"]:not(.role-approved) {
+    display: none !important;
+}
+
 body {
     background-color: var(--bg-main);
     color: var(--text-main);
@@ -36,7 +46,9 @@ body {
     width: 100vw;
 }
 
-/* Sidebar Estilo Clean/Dark */
+/* ==========================================================================
+   Sidebar Estilo Clean/Dark
+   ========================================================================== */
 .sidebar {
     width: 260px;
     background-color: var(--bg-sidebar);
@@ -102,7 +114,9 @@ body {
     font-weight: 600;
 }
 
-/* Área de Conteúdo */
+/* ==========================================================================
+   Área de Conteúdo Principal
+   ========================================================================== */
 .main-content {
     flex: 1;
     display: flex;
@@ -183,7 +197,7 @@ body {
     color: var(--primary);
 }
 
-/* Content Cards (Estilo BowlsLink) */
+/* Content Cards */
 .section-card {
     background-color: var(--bg-card);
     border-radius: var(--radius);
@@ -208,7 +222,9 @@ body {
     letter-spacing: -0.3px;
 }
 
-/* Elementos de Formulários Otimizados */
+/* ==========================================================================
+   Elementos de Formulários Otimizados
+   ========================================================================== */
 .flex-form-row {
     display: flex;
     gap: 16px;
@@ -216,22 +232,25 @@ body {
     margin-bottom: 16px;
 }
 
-.modal-form-group {
+.form-group, .modal-form-group {
     flex: 1;
     min-width: 200px;
     display: flex;
     flex-direction: column;
+    margin-bottom: 16px;
 }
 
-.modal-form-group label {
+.form-group label, .modal-form-group label {
     font-size: 13px;
     font-weight: 600;
     color: #475569;
     margin-bottom: 6px;
 }
 
+input[type="text"],
 .modal-form-group input,
-.modal-form-group select {
+.modal-form-group select,
+select {
     width: 100%;
     padding: 10px 14px;
     border: 1px solid var(--border-color);
@@ -243,13 +262,36 @@ body {
     transition: var(--transition);
 }
 
+input[type="text"]::placeholder {
+    color: #94a3b8;
+}
+
+input[type="text"]:focus,
 .modal-form-group input:focus,
-.modal-form-group select:focus {
+.modal-form-group select:focus,
+select:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
 }
 
-/* Botões Modernizados */
+/* Wrapper customizado para setas de seletores */
+.select-wrapper {
+    position: relative;
+}
+
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+/* ==========================================================================
+   Botões Modernizados
+   ========================================================================== */
 .btn {
     background-color: var(--primary);
     color: var(--text-light);
@@ -261,6 +303,7 @@ body {
     cursor: pointer;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     transition: var(--transition);
 }
@@ -270,7 +313,71 @@ body {
     transform: translateY(-1px);
 }
 
-/* Tabelas Alinhadas e Limpas */
+.btn-secondary {
+    background-color: var(--secondary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--secondary-hover);
+}
+
+/* ==========================================================================
+   Sistema de Modais Centralizado (Removido estilos inline das views)
+   ========================================================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+
+.modal {
+    background: var(--bg-card);
+    width: 100%;
+    max-width: 500px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    animation: modalFadeIn 0.2s ease-out;
+}
+
+.modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-footer {
+    padding: 16px 24px;
+    background-color: #f8fafc;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* ==========================================================================
+   Tabelas Alinhadas e Limpas
+   ========================================================================== */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
@@ -302,6 +409,10 @@ body {
     background-color: #f8fafc;
 }
 
+.text-center {
+    text-align: center !important;
+}
+
 /* Crachás e Ações */
 .badge {
     display: inline-flex;
@@ -313,7 +424,7 @@ body {
     color: #334155;
 }
 
-.badge-success { background-color: #d1fae5; color: #065f46; }
+.badge-success, .badge-status { background-color: #d1fae5; color: #065f46; }
 .badge-primary { background-color: #e0f2fe; color: #0369a1; }
 
 .actions-cell {
@@ -338,6 +449,9 @@ body {
 .btn-icon.delete { color: var(--danger); }
 .btn-icon.delete:hover { background-color: #fee2e2; }
 
+/* ==========================================================================
+   Media Queries (Responsividade)
+   ========================================================================== */
 @media (max-width: 992px) {
     .sidebar { width: 80px; }
     .sidebar .brand span, .nav-link span { display: none; }

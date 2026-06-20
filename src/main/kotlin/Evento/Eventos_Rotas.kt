@@ -9,7 +9,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 
 fun Application.Eventos_Rotas() {
-    val service = EventoService(DBUtils.database)
+    val service = DatabaseCreation.EventoService
 
     routing {
         route("/eventos") {

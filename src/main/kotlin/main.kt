@@ -12,6 +12,7 @@ import com.est.Evento.Eventos_Rotas
 import com.est.Patrocinador.Patrocinadores_Rotas
 import com.est.Agendamento.Agendamento_Rotas
 import com.est.Classificacao.Classificacoes_Rotas
+import com.est.Database.DatabaseInitializer
 import com.est.Inscricao.Inscricao_Rotas
 import kotlinx.coroutines.runBlocking
 
@@ -28,7 +29,22 @@ fun Application.module() {
 
     // 2. Inicializar a Base de Dados
     runBlocking {
-        DatabaseCreation.init()
+        try {
+            DatabaseCreation.init()
+            DatabaseInitializer.init(
+                equipaService        = DatabaseCreation.EquipaService,
+                jogadorService       = DatabaseCreation.JogadorService,
+                organizadorService   = DatabaseCreation.OrganizadorService,
+                pavilhaoService      = DatabaseCreation.PavilhaoService,
+                eventoService        = DatabaseCreation.EventoService,
+                inscricaoService     = DatabaseCreation.InscricaoService,
+                jogoService          = DatabaseCreation.JogoService,
+                estatisticasService  = DatabaseCreation.EstatisticasService,
+                patrocinadorService  = DatabaseCreation.PatrocinadorService
+            )
+        } catch (e: Exception) {
+            println("Erro ao inicializar base de dados: ${e.message}")
+        }
     }
 
     // 3. Registar as Rotas (Adicionamos as rotas do Frontend aqui)
@@ -39,11 +55,11 @@ fun Application.module() {
     Pavilhoes_Rotas()
     Organizadores_Rotas()
     Equipas_Rotas()
+    Agendamento_Rotas() //tem de ser chamado anted de eventos
     Eventos_Rotas()
     Patrocinadores_Rotas()
     Inscricao_Rotas()
     Jogos_Rotas()
     Estatisticas_Rotas()
-    Agendamento_Rotas()
     Classificacoes_Rotas()
 }

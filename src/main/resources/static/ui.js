@@ -2,6 +2,30 @@
  * BasketHub - Administração Avançada UI & Integração API
  */
 
+document.addEventListener("DOMContentLoaded", () => {
+    const perfil = localStorage.getItem('perfil');
+
+    // Se não houver perfil, redireciona para a página de seleção
+    if (!perfil && window.location.pathname !== '/') {
+        window.location.href = '/';
+        return;
+    }
+
+    // Carrega o dashboard por defeito
+    switchTab('dashboard');
+});
+
+async function aplicarFiltroDeAcesso() {
+    const perfil = localStorage.getItem('perfil');
+    if (!perfil) return;
+
+    // Remove o display: none apenas para os elementos autorizados
+    const elementosAutorizados = document.querySelectorAll(`.role-${perfil.toLowerCase()}`);
+    elementosAutorizados.forEach(el => {
+        el.style.display = ''; // Limpa o display:none do CSS
+    });
+}
+
 const viewContainer = document.getElementById('view-container');
 const viewTitle = document.getElementById('current-view-title');
 
@@ -28,9 +52,8 @@ async function apiCall(url, method = 'GET', data = null) {
             throw new Error(txt || `Código de estado do servidor: ${response.status}`);
         }
 
-        // Se a resposta for HTML em vez de JSON, intercetar o erro estruturalmente
         if (contentType.includes("text/html")) {
-            throw new Error("O servidor devolveu uma página HTML em vez de dados JSON. Verifique se o endpoint existe no Ktor.");
+            throw new Error("O servidor divulveu uma página HTML em vez de dados JSON. Verifique se o endpoint existe no Ktor.");
         }
 
         if (response.status === 204 || response.headers.get('content-length') === '0') {
@@ -53,22 +76,78 @@ function showLoader() {
 }
 
 // 2. Orquestrador de Alternância de Abas
-function switchTab(tabName) {
-    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-    const activeLink = document.querySelector(`[data-target="${tabName}"]`);
-    if (activeLink) activeLink.classList.add('active');
+const MatrizAcesso = {
+    'JOGADOR': ['dashboard', 'equipas', 'jogos', 'classificacoes'],
+    'ORGANIZADOR': ['dashboard', 'eventos', 'jogos', 'organizadores', 'inscricoes'],
+    'PATROCINADOR': ['dashboard', 'patrocinadores', 'eventos'],
+    'ADMINISTRADOR': ['dashboard', 'equipas', 'jogadores', 'eventos', 'jogos', 'pavilhoes', 'organizadores', 'patrocinadores', 'inscricoes', 'classificacoes']
+};
 
-    switch (tabName) {
-        case 'dashboard':      loadDashboard(); break;
-        case 'jogadores':      loadJogadores(); break;
-        case 'equipas':        loadEquipas(); break;
-        case 'eventos':        loadEventos(); break;
-        case 'jogos':          loadJogos(); break;
-        case 'pavilhoes':      loadPavilhoes(); break;
-        case 'organizadores':  loadOrganizadores(); break;
-        case 'patrocinadores': loadPatrocinadores(); break;
-        case 'inscricoes':     loadInscricoes(); break;
-        case 'classificacoes': loadClassificacoes(); break;
+async function switchTab(tab) {
+    const perfil = localStorage.getItem('perfil') || 'JOGADOR';
+
+    // 1. Verificação de segurança (Matriz de Acesso)
+    if (!MatrizAcesso[perfil] || !MatrizAcesso[perfil].includes(tab)) {
+        console.warn(`Tentativa de acesso negada: ${perfil} -> ${tab}`);
+        alert("Acesso negado para este perfil!");
+        return;
+    }
+
+    try {
+        // 2. Atualiza o título visível na barra superior
+        document.getElementById('current-view-title').innerText = tab.charAt(0).toUpperCase() + tab.slice(1);
+
+        // 3. Orquestrador Inteligente: Executa a função JS correta para renderizar o ecrã
+        switch (tab) {
+            case 'dashboard':
+                loadDashboard();
+                break;
+            case 'equipas':
+                await loadEquipas();
+                break;
+            case 'jogadores':
+                await loadJogadores();
+                break;
+            case 'eventos':
+                await loadEventos();
+                break;
+            case 'jogos':
+                await loadJogos();
+                break;
+            case 'pavilhoes':
+                await loadPavilhoes();
+                break;
+            case 'organizadores':
+                await loadOrganizadores();
+                break;
+            case 'patrocinadores':
+                await loadPatrocinadores();
+                break;
+            case 'inscricoes':
+                await loadInscricoes();
+                break;
+            case 'classificacoes':
+                await loadClassificacoes();
+                break;
+            default:
+                console.error("Módulo não mapeado:", tab);
+        }
+
+        // 4. Aplica filtros visuais de permissão
+        aplicarFiltroDeAcesso();
+
+        // 5. Atualiza o estado visual ativo dos botões da sidebar
+        document.querySelectorAll('.nav-link').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-target') === tab);
+        });
+
+    } catch (error) {
+        console.error("Erro crítico ao alternar ecrã:", error);
+        document.getElementById('view-container').innerHTML = `
+            <div style="padding:20px; color:var(--danger); text-align:center;">
+                <i class="fa-solid fa-triangle-exclamation" style="font-size:30px;"></i>
+                <p>Ocorreu um erro ao processar os dados deste módulo.</p>
+            </div>`;
     }
 }
 
@@ -92,7 +171,8 @@ async function loadJogadores() {
     viewTitle.innerText = "Jogadores";
     showLoader();
     try {
-        const dados = await apiCall('/jogadores');
+        const perfil = localStorage.getItem('perfil');
+        const dados = await apiCall(`/jogadores?perfil=${perfil}`);
         const rows = dados.map(j => `
             <tr>
                 <td>${j.id}</td>
@@ -514,7 +594,8 @@ async function loadClassificacoes() {
 
 async function submitFormJogador(e) {
     e.preventDefault();
-    await apiCall('/jogadores', 'POST', {
+    const perfil = localStorage.getItem('perfil');
+    await apiCall(`/jogadores?perfil=${perfil}`, 'POST', {
         nome: document.getElementById('j-nome').value,
         posicao: document.getElementById('j-posicao').value,
         n_camisola: parseInt(document.getElementById('j-camisola').value, 10)
@@ -647,16 +728,26 @@ async function deleteItem(url, callback) {
 }
 
 async function actionPost(url, callback) {
+    const perfil = localStorage.getItem('perfil');
+
     try {
-        const response = await fetch(url, { method: 'POST' });
-        if (!response.ok) throw new Error("Falha no agendamento");
-        alert("Sorteio/Agendamento realizado com sucesso!");
+        // Combinamos a lógica de envio com o parâmetro de perfil
+        const response = await fetch(`${url}?perfil=${perfil}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+            // Tenta ler a mensagem de erro do servidor
+            const errorMsg = await response.text();
+            throw new Error(errorMsg || "Falha ao realizar a operação");
+        }
+
+        alert("Operação realizada com sucesso!");
         callback();
+
     } catch (err) {
+        console.error("Erro na operação:", err);
         alert("Erro na operação de agendamento: " + err.message);
     }
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    if (viewContainer) loadDashboard();
-});

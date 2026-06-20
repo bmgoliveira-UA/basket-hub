@@ -10,8 +10,7 @@ import io.ktor.server.routing.*
 
 fun Application.Classificacoes_Rotas() {
     // Usamos o serviço de classificação injetando o JogoService
-    val JogoService = JogoService(DBUtils.database)
-    val classificacaoService = ClassificacaoService(JogoService)
+    val classificacaoService = DatabaseCreation.ClassificacaoService
 
     routing {
         route("/classificacoes") {

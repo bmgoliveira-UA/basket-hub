@@ -13,7 +13,7 @@ import io.ktor.server.routing.*
 
 fun Application.Jogos_Rotas() {
 
-    val service = JogoService(DBUtils.database)
+    val service = DatabaseCreation.JogoService
 
     routing {
         route("/jogos") {
