@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.flow.toList
 import com.est.Pavilhao.PavilhaoService
 import com.est.Organizador.OrganizadorService
+import org.jetbrains.exposed.v1.core.ReferenceOption
 
 // ---------------------------------------------------------------------
 // RF05 / RF08 - Polimorfismo de Eventos
@@ -93,8 +94,8 @@ class EventoService(val database: R2dbcDatabase) {
         val tematica = varchar("tematica", 100).nullable() // só usado pela ClinicaDeTreino
 
         // Foreign Keys reais para a base de dados
-        val pavilhaoId = reference("pavilhao_id", PavilhaoService.Pavilhoes.id)
-        val organizadorId = reference("organizador_id", OrganizadorService.Organizadores.id)
+        val pavilhaoId = reference("pavilhao_id", PavilhaoService.Pavilhoes.id, onDelete = ReferenceOption.CASCADE)
+        val organizadorId = reference("organizador_id", OrganizadorService.Organizadores.id, onDelete = ReferenceOption.CASCADE)
 
         override val primaryKey = PrimaryKey(id)
     }

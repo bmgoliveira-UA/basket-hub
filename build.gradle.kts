@@ -16,7 +16,6 @@ kotlin {
     jvmToolchain(21)
 }
 dependencies {
-    implementation("org.jetbrains.exposed:exposed-datetime:0.53.0")
     implementation(ktorLibs.serialization.kotlinx.json)
     implementation(ktorLibs.server.config.yaml)
     implementation(ktorLibs.server.contentNegotiation)
