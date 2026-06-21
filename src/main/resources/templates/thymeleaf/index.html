@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BasketHub | Seleção de Perfil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --primary: #0284c7;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --bg-card: #ffffff;
+            --border-color: #e2e8f0;
+            --radius: 12px;
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --transition: all 0.2s ease;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        .logo {
+            margin-bottom: 4rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .logo img {
+            max-width: 25%;
+            height: auto;
+        }
+
+        .role-grid {
+            display: flex;
+            gap: 20px;
+            width: 90%;
+            max-width: 900px;
+            justify-content: center;
+        }
+
+        .role-card {
+            width: 20%;
+            min-width: 180px;
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-md);
+        }
+
+        .role-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        .role-card i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="logo">
+    <img src="/utils/logo.png" alt="Logo">
+</div>
+<p style="margin-bottom: 30px; color: var(--text-muted);">Selecione o seu perfil de visualização para continuar</p>
+
+<div class="role-grid">
+    <div class="role-card" onclick="entrar('JOGADOR')">
+        <i class="fa-solid fa-person-running"></i>
+        <h3>Jogador</h3>
+    </div>
+    <div class="role-card" onclick="entrar('ORGANIZADOR')">
+        <i class="fa-solid fa-clipboard-list"></i>
+        <h3>Organizador</h3>
+    </div>
+    <div class="role-card" onclick="entrar('PATROCINADOR')">
+        <i class="fa-solid fa-handshake"></i>
+        <h3>Patrocinador</h3>
+    </div>
+    <div class="role-card" onclick="entrar('ADMINISTRADOR')">
+        <i class="fa-solid fa-user-shield"></i>
+        <h3>Administrador</h3>
+    </div>
+</div>
+
+<script>
+    function entrar(role) {
+        localStorage.setItem("role", role);
+
+        switch(role) {
+            case "JOGADOR":
+                window.location.href = "/jogador";
+                break;
+
+            case "ORGANIZADOR":
+                window.location.href = "/organizador";
+                break;
+
+            case "PATROCINADOR":
+                window.location.href = "/patrocinadores";
+                break;
+
+            case "ADMINISTRADOR":
+                window.location.href = "/publico";
+                break;
+
+            default:
+                window.location.href = "/";
+        }
+    }
+</script>
+</body>
+</html>

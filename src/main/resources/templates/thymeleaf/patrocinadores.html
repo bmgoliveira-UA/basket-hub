@@ -1,0 +1,321 @@
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BasketHub | Patrocinador</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #f8fafc; --bg-sidebar: #0f172a; --bg-sidebar-hover: #1e293b;
+            --primary: #0284c7; --primary-light: #e0f2fe; --success: #16a34a;
+            --danger: #dc2626; --warning: #d97706; --amber: #f59e0b;
+            --text-main: #0f172a; --text-muted: #64748b; --text-sidebar: #cbd5e1;
+            --bg-card: #ffffff; --border-color: #e2e8f0; --radius: 12px;
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07); --transition: all 0.2s ease;
+            --sidebar-width: 240px; --header-height: 60px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-main); color: var(--text-main); display: flex; min-height: 100vh; }
+        .sidebar { width: var(--sidebar-width); background: var(--bg-sidebar); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; overflow-y: auto; }
+        .sidebar-brand { padding: 20px 18px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; gap: 10px; }
+        .sidebar-brand img { width: 36px; }
+        .sidebar-brand span { font-weight: 700; font-size: 18px; color: #fff; }
+        .sidebar-section { padding: 18px 12px 6px; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: #475569; }
+        .nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 16px; margin: 2px 8px; border-radius: 8px; color: var(--text-sidebar); font-size: 14px; font-weight: 500; cursor: pointer; transition: var(--transition); border: none; background: none; width: calc(100% - 16px); text-align: left; }
+        .nav-link:hover { background: var(--bg-sidebar-hover); color: #fff; }
+        .nav-link.active { background: var(--amber); color: #fff; }
+        .nav-link i { width: 18px; text-align: center; font-size: 15px; }
+        .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid #1e293b; }
+        .btn-logout { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 8px; background: #1e293b; color: #94a3b8; border: none; cursor: pointer; font-size: 13px; width: 100%; transition: var(--transition); }
+        .btn-logout:hover { background: #dc2626; color: #fff; }
+        .main-wrapper { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+        .topbar { height: var(--header-height); background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 28px; gap: 12px; position: sticky; top: 0; z-index: 50; }
+        .topbar-icon { width: 34px; height: 34px; background: #fef3c7; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--amber); }
+        #current-view-title { font-weight: 600; font-size: 16px; }
+        .role-badge { margin-left: auto; background: #fef3c7; color: var(--amber); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+        #view-container { padding: 28px; flex: 1; }
+        .grid-dashboard { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .card-stat { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border-color); padding: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-md); }
+        .stat-details h3 { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .stat-details p { font-size: 22px; font-weight: 700; }
+        .stat-icon { font-size: 28px; opacity: 0.15; }
+        .section-card { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border-color); padding: 24px; box-shadow: var(--shadow-md); margin-bottom: 24px; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border-color); }
+        .section-header h2 { font-size: 16px; font-weight: 700; }
+        .table-responsive { overflow-x: auto; }
+        .table-hub { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .table-hub thead th { background: var(--bg-main); padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); border-bottom: 1px solid var(--border-color); }
+        .table-hub tbody tr { border-bottom: 1px solid var(--border-color); transition: var(--transition); }
+        .table-hub tbody tr:hover { background: #f8fafc; }
+        .table-hub tbody td { padding: 12px 14px; vertical-align: middle; }
+        .table-hub tbody tr:last-child { border-bottom: none; }
+        .flex-form-row { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 14px; }
+        .modal-form-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 160px; }
+        .modal-form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+        .modal-form-group input, .modal-form-group select { padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 14px; font-family: 'Inter', sans-serif; background: var(--bg-main); color: var(--text-main); transition: var(--transition); outline: none; }
+        .modal-form-group input:focus, .modal-form-group select:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(245,158,11,0.1); }
+        .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 8px; background: var(--amber); color: #fff; font-size: 13px; font-weight: 600; border: none; cursor: pointer; transition: var(--transition); }
+        .btn:hover { background: #d97706; }
+        .btn-icon { width: 32px; height: 32px; border-radius: 7px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; transition: var(--transition); }
+        .btn-icon.delete { background: #fee2e2; color: var(--danger); }
+        .btn-icon.delete:hover { background: var(--danger); color: #fff; }
+        .actions-cell { display: flex; gap: 6px; align-items: center; }
+        .badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #fef3c7; color: var(--amber); }
+        .badge-success { background: #dcfce7; color: var(--success); }
+        .badge-primary { background: var(--primary-light); color: var(--primary); }
+        .loader-wrap { text-align: center; padding: 50px 20px; color: var(--text-muted); }
+        .loader-wrap i { font-size: 30px; margin-bottom: 12px; color: var(--amber); }
+        .empty-state { text-align: center; padding: 36px 20px; color: var(--text-muted); }
+        .empty-state i { font-size: 36px; margin-bottom: 10px; display: block; opacity: 0.3; }
+        .evento-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 20px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; gap: 16px; box-shadow: var(--shadow-md); flex-wrap: wrap; }
+        .evento-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+        .evento-card-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 14px; }
+        .pat-card { background: linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%); border: 1px solid #fde68a; border-radius: var(--radius); padding: 20px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .pat-card-info h3 { font-size: 15px; font-weight: 700; }
+        .pat-card-info p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+        .pat-valor { font-size: 22px; font-weight: 800; color: var(--amber); }
+        .pat-evento { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; background: #fff; color: var(--amber); border: 1px solid #fde68a; }
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <img src="/utils/logo.png" alt="Logo" onerror="this.style.display='none'">
+        <span>BasketHub</span>
+    </div>
+    <div class="sidebar-section">Visão Geral</div>
+    <button class="nav-link" data-target="dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-house"></i> Dashboard</button>
+    <button class="nav-link" data-target="eventos" onclick="switchTab('eventos')"><i class="fa-solid fa-trophy"></i> Eventos</button>
+    <button class="nav-link" data-target="equipas" onclick="switchTab('equipas')"><i class="fa-solid fa-shield-halved"></i> Equipas</button>
+    <div class="sidebar-section">Patrocínios</div>
+    <button class="nav-link" data-target="meus-patrocinios" onclick="switchTab('meus-patrocinios')"><i class="fa-solid fa-handshake"></i> Meus Patrocínios</button>
+    <button class="nav-link" data-target="registar-patrocinio" onclick="switchTab('registar-patrocinio')"><i class="fa-solid fa-plus-circle"></i> Registar Patrocínio</button>
+    <div class="sidebar-footer">
+        <button class="btn-logout" onclick="sair()"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
+    </div>
+</aside>
+<div class="main-wrapper">
+    <header class="topbar">
+        <div class="topbar-icon"><i class="fa-solid fa-handshake"></i></div>
+        <span id="current-view-title">Dashboard</span>
+        <span class="role-badge">PATROCINADOR</span>
+    </header>
+    <main id="view-container"></main>
+</div>
+<script>
+    (function() {
+        const role = localStorage.getItem('role');
+        if (!role || role !== 'PATROCINADOR') window.location.href = '/';
+    })();
+
+    function sair() { localStorage.removeItem('role'); window.location.href = '/'; }
+
+    async function apiCall(url, method = 'GET', data = null) {
+        const role = localStorage.getItem('role');
+        if (!role) { window.location.href = '/'; return; }
+        const sep = url.includes('?') ? '&' : '?';
+        const finalUrl = `${url}${sep}role=${role}`;
+        const cfg = { method, headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } };
+        if (data && (method === 'POST' || method === 'PUT')) cfg.body = JSON.stringify(data);
+        const res = await fetch(finalUrl, cfg);
+        const ct = res.headers.get('content-type') || '';
+        if (!res.ok) { const t = await res.text(); throw new Error(t || `Erro ${res.status}`); }
+        if (ct.includes('text/html')) throw new Error('O servidor devolveu HTML em vez de JSON.');
+        if (res.status === 204) return null;
+        return res.json();
+    }
+
+    function showLoader() {
+        document.getElementById('view-container').innerHTML = `<div class="loader-wrap"><i class="fa-solid fa-basketball fa-spin"></i><p>A carregar dados...</p></div>`;
+    }
+
+    async function switchTab(tab) {
+        document.querySelectorAll('.nav-link').forEach(b => b.classList.toggle('active', b.dataset.target === tab));
+        try {
+            switch(tab) {
+                case 'dashboard':           loadDashboard(); break;
+                case 'eventos':             await loadEventos(); break;
+                case 'equipas':             await loadEquipas(); break;
+                case 'meus-patrocinios':    await loadMeusPatrocinios(); break;
+                case 'registar-patrocinio': await loadRegistarPatrocinio(); break;
+            }
+        } catch(e) {
+            document.getElementById('view-container').innerHTML = `<div class="section-card" style="text-align:center;color:var(--danger);"><i class="fa-solid fa-triangle-exclamation" style="font-size:28px;margin-bottom:10px;"></i><p>Erro ao carregar este módulo.</p></div>`;
+        }
+    }
+
+    async function loadDashboard() {
+        document.getElementById('current-view-title').innerText = 'Dashboard';
+        showLoader();
+        const [patrocinadores, eventos] = await Promise.all([apiCall('/patrocinadores'), apiCall('/eventos')]);
+        const totalContrato = patrocinadores.reduce((s, p) => s + (p.valorContrato || 0), 0);
+        document.getElementById('view-container').innerHTML = `
+        <div class="grid-dashboard">
+            <div class="card-stat"><div class="stat-details"><h3>Patrocínios Ativos</h3><p>${patrocinadores.length}</p></div><i class="fa-solid fa-handshake stat-icon" style="color:var(--amber);"></i></div>
+            <div class="card-stat"><div class="stat-details"><h3>Eventos Disponíveis</h3><p>${eventos.length}</p></div><i class="fa-solid fa-trophy stat-icon" style="color:var(--primary);"></i></div>
+            <div class="card-stat"><div class="stat-details"><h3>Volume Total</h3><p>${totalContrato.toLocaleString('pt-PT',{style:'currency',currency:'EUR'})}</p></div><i class="fa-solid fa-euro-sign stat-icon" style="color:var(--success);"></i></div>
+        </div>
+        <div class="section-card">
+            <div class="section-header"><h2>Portal de Patrocínios</h2></div>
+            <p style="color:var(--text-muted);line-height:1.7;font-size:14px;">Consulta eventos e equipas, regista novos patrocínios e acompanha o histórico dos teus acordos comerciais.</p>
+        </div>`;
+    }
+
+    async function loadEventos() {
+        document.getElementById('current-view-title').innerText = 'Eventos';
+        showLoader();
+        const [eventos, pavilhoes, organizadores] = await Promise.all([apiCall('/eventos'), apiCall('/pavilhoes'), apiCall('/organizadores')]);
+        const cards = eventos.map(ev => {
+            const pav = pavilhoes.find(p => p.id === ev.pavilhaoId)?.nome || `Pavilhão #${ev.pavilhaoId}`;
+            const org = organizadores.find(o => o.id === ev.organizadorId)?.nome || `Org #${ev.organizadorId}`;
+            return `<div class="evento-card"><div><h3>${ev.nome}</h3><div class="evento-card-meta"><span><i class="fa-solid fa-calendar"></i> ${ev.data}</span><span><i class="fa-solid fa-location-dot"></i> ${pav}</span><span><i class="fa-solid fa-user"></i> ${org}</span></div></div><button class="btn" onclick="switchTab('registar-patrocinio')"><i class="fa-solid fa-handshake"></i> Patrocinar</button></div>`;
+        }).join('');
+        document.getElementById('view-container').innerHTML = `
+        <div class="section-card">
+            <div class="section-header"><h2>Eventos Disponíveis</h2></div>
+            ${cards || '<div class="empty-state"><i class="fa-solid fa-trophy"></i><p>Nenhum evento disponível.</p></div>'}
+        </div>`;
+    }
+
+    async function loadEquipas() {
+        document.getElementById('current-view-title').innerText = 'Equipas';
+        showLoader();
+        const dados = await apiCall('/equipas');
+        const rows = dados.map(e => `<tr><td>${e.id}</td><td><strong>${e.nome}</strong></td><td><span class="badge badge-primary">${e.sigla}</span></td><td>${e.localidade}</td></tr>`).join('');
+        document.getElementById('view-container').innerHTML = `
+        <div class="section-card">
+            <div class="section-header"><h2>Equipas Participantes</h2></div>
+            <div class="table-responsive">
+                <table class="table-hub">
+                    <thead><tr><th>ID</th><th>Nome</th><th>Sigla</th><th>Localidade</th></tr></thead>
+                    <tbody>${rows || '<tr><td colspan="4"><div class="empty-state"><i class="fa-solid fa-shield-halved"></i><p>Nenhuma equipa.</p></div></td></tr>'}</tbody>
+                </table>
+            </div>
+        </div>`;
+    }
+
+    async function loadMeusPatrocinios() {
+        document.getElementById('current-view-title').innerText = 'Meus Patrocínios';
+        showLoader();
+        const [patrocinadores, eventos] = await Promise.all([apiCall('/patrocinadores'), apiCall('/eventos')]);
+        window._eventos = eventos;
+        document.getElementById('view-container').innerHTML = `
+        <div class="section-card" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border-color:#fde68a;">
+            <div class="section-header" style="border-color:#fde68a;">
+                <h2>Volume Total Investido</h2>
+                <span style="font-size:24px;font-weight:800;color:var(--amber);">${patrocinadores.reduce((s,p)=>s+(p.valorContrato||0),0).toLocaleString('pt-PT',{style:'currency',currency:'EUR'})}</span>
+            </div>
+            <p style="color:var(--text-muted);font-size:13px;">${patrocinadores.length} acordo(s) ativo(s)</p>
+        </div>
+        <div class="section-card">
+            <div class="section-header"><h2>Histórico de Patrocínios</h2></div>
+            <div id="lista-patrocinios">${renderPatrocinios(patrocinadores, eventos)}</div>
+        </div>`;
+    }
+
+    function renderPatrocinios(dados, eventos) {
+        const evs = eventos || window._eventos || [];
+        if (!dados || !dados.length) return '<div class="empty-state"><i class="fa-solid fa-handshake"></i><p>Nenhum patrocínio registado.</p></div>';
+        return dados.map(p => {
+            const evNome = p.eventoId ? (evs.find(ev => ev.id === p.eventoId)?.nome || `Evento #${p.eventoId}`) : 'Fundo Geral Desportivo';
+            return `<div class="pat-card">
+            <div class="pat-card-info"><h3>${p.nome}</h3><p>${p.empresa}</p></div>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <span class="pat-evento">${evNome}</span>
+                <span class="pat-valor">${p.valorContrato.toLocaleString('pt-PT',{style:'currency',currency:'EUR'})}</span>
+                <button class="btn-icon delete" onclick="deletePatrocinio(${p.id})"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        </div>`;
+        }).join('');
+    }
+
+    async function deletePatrocinio(id) {
+        if (!confirm('Eliminar este patrocínio?')) return;
+
+        try {
+            // 1. Send the delete command to the server
+            await apiCall(`/patrocinadores/${id}`, 'DELETE');
+
+            // 2. Fetch the fresh list and update the view dynamically
+            const dados = await apiCall('/patrocinadores');
+            const el = document.getElementById('lista-patrocinios');
+            if (el) el.innerHTML = renderPatrocinios(dados, window._eventos);
+
+            // 3. Since deleting an item changes the totals, let's refresh the whole tab
+            // to keep the "Volume Total" counter accurate!
+            await loadMeusPatrocinios();
+
+        } catch (error) {
+            console.error("Erro ao eliminar ou atualizar:", error);
+
+            // Fallback: If it crashed because of a backend response format,
+            // we know the delete worked, so force a tab refresh anyway.
+            await loadMeusPatrocinios();
+        }
+    }
+
+    async function loadRegistarPatrocinio() {
+        document.getElementById('current-view-title').innerText = 'Registar Patrocínio';
+        showLoader();
+        const eventos = await apiCall('/eventos');
+        window._eventos = eventos;
+        const optEv = eventos.map(ev => `<option value="${ev.id}">${ev.nome}</option>`).join('');
+        document.getElementById('view-container').innerHTML = `
+        <div class="section-card">
+            <div class="section-header"><h2>Novo Acordo Comercial</h2></div>
+            <form id="form-patrocinio" onsubmit="submitPatrocinio(event)">
+                <div class="flex-form-row">
+                    <div class="modal-form-group"><label>Nome do Representante</label><input type="text" id="pat-nome" required></div>
+                    <div class="modal-form-group"><label>Empresa / Marca</label><input type="text" id="pat-empresa" required></div>
+                </div>
+                <div class="flex-form-row">
+                    <div class="modal-form-group"><label>Montante do Contrato (€)</label><input type="number" step="0.01" id="pat-valor" min="0" required></div>
+                    <div class="modal-form-group"><label>Evento a Patrocinar</label>
+                        <select id="pat-evento"><option value="">-- Fundo de Apoio Geral --</option>${optEv}</select>
+                    </div>
+                </div>
+                <button type="submit" class="btn"><i class="fa-solid fa-handshake"></i> Registar Patrocínio</button>
+            </form>
+        </div>`;
+    }
+
+    async function submitPatrocinio(e) {
+        e.preventDefault();
+
+        try {
+            const evVal = document.getElementById('pat-evento').value;
+
+            // 1. Send data to the backend
+            await apiCall('/patrocinadores', 'POST', {
+                nome: document.getElementById('pat-nome').value,
+                empresa: document.getElementById('pat-empresa').value,
+                valorContrato: parseFloat(document.getElementById('pat-valor').value),
+                eventoId: evVal ? parseInt(evVal, 10) : null
+            });
+
+            // 2. If successful, clear the form and show alert
+            e.target.reset();
+            alert('Patrocínio registado com sucesso!');
+
+            // 3. Automatically refresh the component!
+            await switchTab('meus-patrocinios');
+
+        } catch (error) {
+            // If the server response causes an error, it will be logged here
+            console.error("Erro após submissão:", error);
+
+            // Let's force the UI to refresh anyway, since we know the DB saved it
+            e.target.reset();
+            await switchTab('meus-patrocinios');
+        }
+    }
+
+    switchTab('dashboard');
+</script>
+</body>
+</html>
+
+

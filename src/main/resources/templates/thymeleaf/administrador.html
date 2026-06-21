@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BasketHub | Criação de Entidades Base (Admin)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #f8fafc; --bg-sidebar: #0f172a;
+            --primary: #0284c7; --purple: #7c3aed;
+            --text-main: #0f172a; --text-muted: #64748b; --text-sidebar: #cbd5e1;
+            --bg-card: #ffffff; --border-color: #e2e8f0; --radius: 12px;
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07); --transition: all 0.2s ease;
+            --sidebar-width: 240px; --header-height: 60px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-main); color: var(--text-main); display: flex; min-height: 100vh; }
+
+        /* Layout Clássico Estático */
+        .sidebar { width: var(--sidebar-width); background: var(--bg-sidebar); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; }
+        .sidebar-brand { padding: 20px 18px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; gap: 10px; }
+        .sidebar-brand span { font-weight: 700; font-size: 18px; color: #fff; }
+        .sidebar-section { padding: 18px 12px 6px; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: #475569; }
+        .nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 16px; margin: 2px 8px; border-radius: 8px; color: var(--text-sidebar); font-size: 14px; font-weight: 500; text-decoration: none; transition: var(--transition); }
+        .nav-link:hover { background: #1e293b; color: #fff; }
+
+        .main-wrapper { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; }
+        .topbar { height: var(--header-height); background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 28px; position: sticky; top: 0; z-index: 50; }
+        .topbar h1 { font-size: 16px; font-weight: 600; }
+
+        #view-container { padding: 28px; max-width: 900px; }
+
+        /* Formulários Puros */
+        .section-card { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border-color); padding: 24px; box-shadow: var(--shadow-md); margin-bottom: 30px; scroll-margin-top: 90px; }
+        .section-header { margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border-color); }
+        .section-header h2 { font-size: 18px; font-weight: 700; color: var(--purple); }
+
+        .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+        .form-group input { padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 14px; font-family: 'Inter', sans-serif; transition: var(--transition); outline: none; }
+        .form-group input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+
+        .btn-submit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; border-radius: 8px; background: var(--purple); color: #fff; font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: var(--transition); width: 100%; margin-top: 10px; }
+        .btn-submit:hover { background: #6d28d9; }
+
+        .alert-info { background: #e0f2fe; color: #0284c7; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <i class="fa-solid fa-basketball" style="color: #f97316; font-size: 24px;"></i>
+        <span>BasketHub</span>
+    </div>
+
+    <div class="sidebar-section">Menu de Criação</div>
+    <a href="#form-organizadores" class="nav-link"><i class="fa-solid fa-id-badge"></i> Organizadores</a>
+    <a href="#form-patrocinadores" class="nav-link"><i class="fa-solid fa-handshake"></i> Patrocinadores</a>
+    <a href="#form-pavilhoes" class="nav-link"><i class="fa-solid fa-building"></i> Pavilhões</a>
+
+    <div class="sidebar-section">Sistema</div>
+    <a href="/" class="nav-link" style="margin-top: auto;"><i class="fa-solid fa-right-from-bracket"></i> Voltar</a>
+</aside>
+
+<div class="main-wrapper">
+    <header class="topbar">
+        <h1><i class="fa-solid fa-server" style="color: var(--purple); margin-right: 10px;"></i> Criação Direta de Entidades Base</h1>
+    </header>
+
+    <main id="view-container">
+        <div class="alert-info">
+            <i class="fa-solid fa-circle-info"></i> Formulários configurados para submissão POST nativa (application/x-www-form-urlencoded).
+        </div>
+
+        <div id="form-organizadores" class="section-card">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-id-badge"></i> Registar Organizador</h2>
+            </div>
+            <form action="/organizadores" method="POST">
+                <div class="form-group">
+                    <label for="org_nome">Nome Completo</label>
+                    <input type="text" id="org_nome" name="nome" required placeholder="Ex: Carlos Albuquerque">
+                </div>
+                <div class="form-group">
+                    <label for="org_contacto">Contacto Telefónico</label>
+                    <input type="text" id="org_contacto" name="contacto" required placeholder="Ex: 912345678">
+                </div>
+                <div class="form-group">
+                    <label for="org_email">Email</label>
+                    <input type="email" id="org_email" name="email" required placeholder="carlos@baskethub.pt">
+                </div>
+                <button type="submit" class="btn-submit">Gravar Organizador</button>
+            </form>
+        </div>
+
+        <div id="form-patrocinadores" class="section-card">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-handshake"></i> Registar Patrocinador</h2>
+            </div>
+            <form action="/patrocinadores" method="POST">
+                <div class="form-group">
+                    <label for="pat_nome">Nome do Patrocinador / Representante</label>
+                    <input type="text" id="pat_nome" name="nome" required placeholder="Ex: Maria João">
+                </div>
+                <div class="form-group">
+                    <label for="pat_empresa">Empresa</label>
+                    <input type="text" id="pat_empresa" name="empresa" required placeholder="Ex: Basket Store Lda.">
+                </div>
+                <div class="form-group">
+                    <label for="pat_valor">Valor do Contrato (€)</label>
+                    <input type="number" id="pat_valor" name="valorContrato" step="0.01" required placeholder="Ex: 5000">
+                </div>
+                <div class="form-group">
+                    <label for="pat_evento">ID do Evento (Opcional)</label>
+                    <input type="number" id="pat_evento" name="eventoId" placeholder="Deixe em branco para fundo geral">
+                </div>
+                <button type="submit" class="btn-submit">Gravar Patrocinador</button>
+            </form>
+        </div>
+
+        <div id="form-pavilhoes" class="section-card">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-building"></i> Registar Pavilhão</h2>
+            </div>
+            <form action="/pavilhoes" method="POST">
+                <div class="form-group">
+                    <label for="pav_nome">Nome da Infraestrutura</label>
+                    <input type="text" id="pav_nome" name="nome" required placeholder="Ex: Dragão Arena">
+                </div>
+                <div class="form-group">
+                    <label for="pav_cidade">Cidade</label>
+                    <input type="text" id="pav_cidade" name="cidade" required placeholder="Ex: Porto">
+                </div>
+                <div class="form-group">
+                    <label for="pav_localizacao">Localização Completa</label>
+                    <input type="text" id="pav_localizacao" name="localizacao" required placeholder="Ex: Via Futebol Clube do Porto">
+                </div>
+                <div class="form-group">
+                    <label for="pav_capacidade">Capacidade (Lotação)</label>
+                    <input type="number" id="pav_capacidade" name="capacidade" required placeholder="Ex: 2200">
+                </div>
+                <button type="submit" class="btn-submit">Gravar Pavilhão</button>
+            </form>
+        </div>
+
+    </main>
+</div>
+
+<script src="/static/ui.js"></script>
+</body>
+</html>

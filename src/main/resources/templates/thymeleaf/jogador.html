@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BasketHub | Jogador</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #f8fafc; --bg-sidebar: #0f172a; --bg-sidebar-hover: #1e293b;
+            --primary: #0284c7; --primary-light: #e0f2fe; --success: #16a34a;
+            --danger: #dc2626; --warning: #d97706; --text-main: #0f172a;
+            --text-muted: #64748b; --text-sidebar: #cbd5e1; --bg-card: #ffffff;
+            --border-color: #e2e8f0; --radius: 12px;
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07); --transition: all 0.2s ease;
+            --sidebar-width: 240px; --header-height: 60px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-main); color: var(--text-main); display: flex; min-height: 100vh; }
+        .sidebar { width: var(--sidebar-width); background: var(--bg-sidebar); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; overflow-y: auto; }
+        .sidebar-brand { padding: 20px 18px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; gap: 10px; }
+        .sidebar-brand img { width: 36px; }
+        .sidebar-brand span { font-weight: 700; font-size: 18px; color: #fff; letter-spacing: -0.3px; }
+        .sidebar-section { padding: 18px 12px 6px; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: #475569; }
+        .nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 16px; margin: 2px 8px; border-radius: 8px; color: var(--text-sidebar); font-size: 14px; font-weight: 500; cursor: pointer; transition: var(--transition); border: none; background: none; width: calc(100% - 16px); text-align: left; }
+        .nav-link:hover { background: var(--bg-sidebar-hover); color: #fff; }
+        .nav-link.active { background: var(--primary); color: #fff; }
+        .nav-link i { width: 18px; text-align: center; font-size: 15px; }
+        .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid #1e293b; }
+        .btn-logout { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 8px; background: #1e293b; color: #94a3b8; border: none; cursor: pointer; font-size: 13px; width: 100%; transition: var(--transition); }
+        .btn-logout:hover { background: #dc2626; color: #fff; }
+        .main-wrapper { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+        .topbar { height: var(--header-height); background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 28px; gap: 12px; position: sticky; top: 0; z-index: 50; }
+        .topbar-icon { width: 34px; height: 34px; background: var(--primary-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--primary); }
+        #current-view-title { font-weight: 600; font-size: 16px; }
+        .role-badge { margin-left: auto; background: var(--primary-light); color: var(--primary); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+        #view-container { padding: 28px; flex: 1; }
+        .grid-dashboard { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .card-stat { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border-color); padding: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-md); }
+        .stat-details h3 { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .stat-details p { font-size: 22px; font-weight: 700; }
+        .stat-icon { font-size: 28px; opacity: 0.15; }
+        .section-card { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border-color); padding: 24px; box-shadow: var(--shadow-md); margin-bottom: 24px; }
+        .section-card { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border-color); padding: 24px; box-shadow: var(--shadow-md); margin-bottom: 24px; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border-color); }
+        .section-header h2 { font-size: 16px; font-weight: 700; }
+        .table-responsive { overflow-x: auto; }
+        .table-hub { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .table-hub thead th { background: var(--bg-main); padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); border-bottom: 1px solid var(--border-color); }
+        .table-hub tbody tr { border-bottom: 1px solid var(--border-color); transition: var(--transition); }
+        .table-hub tbody tr:hover { background: #f8fafc; }
+        .table-hub tbody td { padding: 12px 14px; vertical-align: middle; }
+        .table-hub tbody tr:last-child { border-bottom: none; }
+        .flex-form-row { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 14px; }
+        .modal-form-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 160px; }
+        .modal-form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+        .modal-form-group input, .modal-form-group select { padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 14px; font-family: 'Inter', sans-serif; background: var(--bg-main); color: var(--text-main); transition: var(--transition); outline: none; }
+        .modal-form-group input:focus, .modal-form-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(2,132,199,0.1); }
+        .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 8px; background: var(--primary); color: #fff; font-size: 13px; font-weight: 600; border: none; cursor: pointer; transition: var(--transition); }
+        .btn:hover { background: #0369a1; }
+        .btn-secondary { background: #f1f5f9; color: var(--text-main); }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .btn-icon { width: 32px; height: 32px; border-radius: 7px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; transition: var(--transition); }
+        .btn-icon.delete { background: #fee2e2; color: var(--danger); }
+        .btn-icon.delete:hover { background: var(--danger); color: #fff; }
+        .btn-icon.edit { background: #dbeafe; color: #2563eb; }
+        .btn-icon.edit:hover { background: #2563eb; color: #fff; }
+        .actions-cell { display: flex; gap: 6px; align-items: center; }
+        .badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; background: var(--primary-light); color: var(--primary); }
+        .badge-success { background: #dcfce7; color: var(--success); }
+        .badge-danger { background: #fee2e2; color: var(--danger); }
+        .badge-primary { background: var(--primary-light); color: var(--primary); }
+        .loader-wrap { text-align: center; padding: 50px 20px; color: var(--text-muted); }
+        .loader-wrap i { font-size: 30px; margin-bottom: 12px; color: var(--primary); }
+        .empty-state { text-align: center; padding: 36px 20px; color: var(--text-muted); }
+        .empty-state i { font-size: 36px; margin-bottom: 10px; display: block; opacity: 0.3; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-bottom: 24px; }
+        .stat-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 18px 14px; text-align: center; box-shadow: var(--shadow-md); }
+        .stat-box .num { font-size: 28px; font-weight: 800; color: var(--primary); line-height: 1; margin-bottom: 6px; }
+        .stat-box .lbl { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .jogo-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; box-shadow: var(--shadow-md); flex-wrap: wrap; }
+        .jogo-equipa { font-weight: 700; font-size: 15px; }
+        .jogo-vs { font-size: 12px; font-weight: 700; color: var(--text-muted); padding: 0 8px; }
+        .jogo-resultado { font-size: 20px; font-weight: 800; color: var(--primary); min-width: 60px; text-align: center; }
+        .jogo-meta { font-size: 12px; color: var(--text-muted); display: flex; flex-direction: column; gap: 3px; text-align: right; }
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <img src="/utils/logo.png" alt="Logo" onerror="this.style.display='none'">
+        <span>BasketHub</span>
+    </div>
+    <div class="sidebar-section">Equipa</div>
+    <button class="nav-link" data-target="dashboard" onclick="switchTab('dashboard')"><i class="fa-solid fa-house"></i> Dashboard</button>
+    <button class="nav-link" data-target="minha-equipa" onclick="switchTab('minha-equipa')"><i class="fa-solid fa-shield-halved"></i> Minha Equipa</button>
+    <button class="nav-link" data-target="jogadores" onclick="switchTab('jogadores')"><i class="fa-solid fa-users"></i> Jogadores</button>
+    <div class="sidebar-section">Competição</div>
+    <button class="nav-link" data-target="equipas" onclick="switchTab('equipas')"><i class="fa-solid fa-layer-group"></i> Equipas</button>
+    <button class="nav-link" data-target="inscricoes" onclick="switchTab('inscricoes')"><i class="fa-solid fa-clipboard-check"></i> Inscrições</button>
+    <button class="nav-link" data-target="jogos" onclick="switchTab('jogos')"><i class="fa-solid fa-calendar-days"></i> Jogos & Calendário</button>
+    <div class="sidebar-section">Análise</div>
+    <button class="nav-link" data-target="estatisticas" onclick="switchTab('estatisticas')"><i class="fa-solid fa-chart-bar"></i> Estatísticas</button>
+    <button class="nav-link" data-target="classificacoes" onclick="switchTab('classificacoes')"><i class="fa-solid fa-ranking-star"></i> Classificações</button>
+    <div class="sidebar-footer">
+        <button class="btn-logout" onclick="sair()"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
+    </div>
+</aside>
+<div class="main-wrapper">
+    <header class="topbar">
+        <div class="topbar-icon"><i class="fa-solid fa-basketball"></i></div>
+        <span id="current-view-title">Dashboard</span>
+        <span class="role-badge">JOGADOR</span>
+    </header>
+    <main id="view-container"></main>
+</div>
+<script>
+    (function() {
+        const role = localStorage.getItem('role');
+        if (!role || role !== 'JOGADOR') window.location.href = '/';
+    })();
+
+    function sair() { localStorage.removeItem('role'); window.location.href = '/'; }
+
+    async function apiCall(url, method = 'GET', data = null) {
+        const role = localStorage.getItem('role');
+        if (!role) { window.location.href = '/'; return; }
+        const sep = url.includes('?') ? '&' : '?';
+        const finalUrl = `${url}${sep}role=${role}`;
+        const cfg = { method, headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' } };
+        if (data && (method === 'POST' || method === 'PUT')) cfg.body = JSON.stringify(data);
+        const res = await fetch(finalUrl, cfg);
+        const ct = res.headers.get('content-type') || '';
+        if (!res.ok) { const t = await res.text(); throw new Error(t || `Erro ${res.status}`); }
+        if (ct.includes('text/html')) throw new Error('O servidor devolveu HTML em vez de JSON.');
+        if (res.status === 204) return null;
+        return res.json();
+    }
+
+    function showLoader() {
+        document.getElementById('view-container').innerHTML = `<div class="loader-wrap"><i class="fa-solid fa-basketball fa-spin"></i><p>A carregar dados...</p></div>`;
+    }
+
+    function emptyRow(cols, icon, msg) {
+        return `<tr><td colspan="${cols}"><div class="empty-state"><i class="fa-solid ${icon}"></i><p>${msg}</p></div></td></tr>`;
+    }
+
+    async function switchTab(tab) {
+        document.querySelectorAll('.nav-link').forEach(b => b.classList.toggle('active', b.dataset.target === tab));
+        try {
+            switch(tab) {
+                case 'dashboard':      loadDashboard(); break;
+                case 'minha-equipa':   await loadMinhaEquipa(); break;
+                case 'jogadores':      await loadJogadoresEquipa(); break;
+                case 'equipas':        await loadEquipas(); break;
+                case 'inscricoes':     await loadInscricoes(); break;
+                case 'jogos':          await loadJogos(); break;
+                case 'estatisticas':   await loadEstatisticas(); break;
+                case 'classificacoes': await loadClassificacoes(); break;
+            }
+        } catch(e) {
+            document.getElementById('view-container').innerHTML = `<div class="section-card" style="text-align:center;color:var(--danger);"><i class="fa-solid fa-triangle-exclamation" style="font-size:28px;margin-bottom:10px;"></i><p>Erro ao carregar este módulo.</p></div>`;
+        }
+    }
+
+    function loadDashboard() {
+        document.getElementById('current-view-title').innerText = 'Dashboard';
+        document.getElementById('view-container').innerHTML = `
+        <div class="grid-dashboard">
+            <div class="card-stat"><div class="stat-details"><h3>Plataforma</h3><p>BasketHub</p></div><i class="fa-solid fa-basketball stat-icon" style="color:#f97316;"></i></div>
+            <div class="card-stat"><div class="stat-details"><h3>Perfil Ativo</h3><p>Jogador</p></div><i class="fa-solid fa-person-running stat-icon" style="color:var(--primary);"></i></div>
+        </div>
+        <div class="section-card">
+            <div class="section-header"><h2>Bem-vindo ao BasketHub</h2></div>
+            <p style="color:var(--text-muted);line-height:1.7;font-size:14px;">Gere a tua equipa, consulta jogos agendados, inscreve-te em eventos e acompanha as tuas estatísticas.</p>
+        </div>`;
+    }
+
+    // ── MINHA EQUIPA ──────────────────────────────────────────────
+    async function loadMinhaEquipa() {
+        document.getElementById('current-view-title').innerText = 'Minha Equipa';
+        showLoader();
+        const dados = await apiCall('/equipas');
+        document.getElementById('view-container').innerHTML = `
+        <div class="section-card">
+            <div class="section-header"><h2>Criar Nova Equipa</h2></div>
+            <form id="form-equipa" onsubmit="submitEquipa(event)">
+                <div class="flex-form-row">
+                    <div class="modal-form-group"><label>Nome da Equipa</label><input type="text" id="e-nome" required></div>
+                    <div class="modal-form-group"><label>Sigla</label><input type="text" id="e-sigla" required></div>
+                    <div class="modal-form-group"><label>Localidade</label><input type="text" id="e-localidade" required></div>
+                </div>
+                <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> Criar Equipa</button>
+            </form>
+        </div>
+        <div class="section-card">
+            <div class="section-header"><h2>Equipas Registadas</h2></div>
+            <div class="table-responsive">
+                <table class="table-hub">
+                    <thead><tr><th>ID</th><th>Nome</th><th>Sigla</th><th>Localidade</th><th>Ações</th></tr></thead>
+                    <tbody id="tbody-equipas">${renderEquipas(dados)}</tbody>
+                </table>
+            </div>
+        </div>`;
+    }
+
+    function renderEquipas(dados) {
+        if (!dados || !dados.length) return emptyRow(5, 'fa-users-slash', 'Nenhuma equipa registada.');
+        return dados.map(e => `
+        <tr>
+            <td>${e.id}</td>
+            <td><strong>${e.nome}</strong></td>
+            <td><span class="badge badge-primary">${e.sigla}</span></td>
+            <td>${e.localidade}</td>
+            <td class="actions-cell">
+                <button class="btn-icon delete" onclick="deleteEquipa(${e.id})"><i class="fa-solid fa-trash"></i></button>
+            </td>
+        </tr>`).join('');
+    }
+
+    async function submitEquipa(e) {
+        e.preventDefault();
+        try {
+            await apiCall('/equipas', 'POST', {
+                nome: document.getElementById('e-nome').value,
+                sigla: document.getElementById('e-sigla').value,
+                localidade: document.getElementById('e-localidade').value
+            });
+            e.target.reset();
+            await refreshTbody('tbody-equipas', '/equipas', renderEquipas);
+        } catch (error) {
+            console.error("Erro ao submeter equipa:", error);
+            e.target.reset();
+            await refreshTbody('tbody-equipas', '/equipas', renderEquipas);
+        }
+    }
+
+    async function deleteEquipa(id) {
+        if (!confirm('Eliminar esta equipa?')) return;
+        try {
+            await apiCall(`/equipas/${id}`, 'DELETE');
+            await refreshTbody('tbody-equipas', '/equipas', renderEquipas);
+        } catch (error) {
+            console.error("Erro ao eliminar equipa:", error);
+            await refreshTbody('tbody-equipas', '/equipas', renderEquipas);
+        }
+    }
+
+    // ── JOGADORES ────────────────────────────────────────────────
+    async function loadJogadoresEquipa() {
+        document.getElementById('current-view-title').innerText = 'Jogadores';
+        showLoader();
+        const dados = await apiCall('/jogadores');
+        document.getElementById('view-container').innerHTML = `
+        <div class="section-card">
+            <div class="section-header"><h2>Adicionar Jogador</h2></div>
+            <form id="form-jogador" onsubmit="submitJogador(event)">
+                <div class="flex-form-row">
+                    <div class="modal-form-group"><label>Nome Completo</label><input type="text" id="j-nome" required></div>
+                    <div class="modal-form-group"><label>Posição</label><input type="text" id="j-posicao" placeholder="Base, Poste..." required></div>
+                    <div class="modal-form-group"><label>Nº Camisola</label><input type="number" id="j-camisola" min="0" max="99" required></div>
+                </div>
+                <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> Adicionar Jogador</button>
+            </form>
+        </div>
+        <div class="section-card">
+            <div class="section-header"><h2>Plantel</h2></div>
+            <div class="table-responsive">
+                <table class="table-hub">
+                    <thead><tr><th>ID</th><th>Nome</th><th>Posição</th><th>Nº Camisola</th><th>Ações</th></tr></thead>
+                    <tbody id="tbody-jogadores">${renderJogadores(dados)}</tbody>
+                </table>
+            </div>
+        </div>`;
+    }
+
+    function renderJogadores(dados) {
+        if (!dados || !dados.length) return emptyRow(5, 'fa-person-running', 'Nenhum jogador no plantel.');
+        return dados.map(j => `
+        <tr>
+            <td>${j.id}</td>
+            <td><strong>${j.nome}</strong></td>
+            <td><span class="badge">${j.posicao}</span></td>
+            <td>#${j.n_camisola}</td>
+            <td class="actions-cell">
+                <button class="btn-icon delete" onclick="deleteJogador(${j.id})"><i class="fa-solid fa-trash"></i></button>
+            </td>
+        </tr>`).join('');
+    }
+
+    async function submitJogador(e) {
+        e.preventDefault();
+        try {
+            await apiCall('/jogadores', 'POST', {
+                nome: document.getElementById('j-nome').value,
+                posicao: document.getElementById('j-posicao').value,
+                n_camisola: parseInt(document.getElementById('j-camisola').value, 10)
+            });
+            e.target.reset();
+            await refreshTbody('tbody-jogadores', '/jogadores', renderJogadores);
+        } catch (error) {
+            console.error("Erro ao adicionar jogador:", error);
+            e.target.reset();
+            await refreshTbody('tbody-jogadores', '/jogadores', renderJogadores);
+        }
+    }
+
+    async function deleteJogador(id) {
+        if (!confirm('Eliminar este jogador?')) return;
+        try {
+            await apiCall(`/jogadores/${id}`, 'DELETE');
+            await refreshTbody('tbody-jogadores', '/jogadores', renderJogadores);
+        } catch (error) {
+            console.error("Erro ao eliminar jogador:", error);
+            await refreshTbody('tbody-jogadores', '/jogadores', renderJogadores);
+        }
+    }
+
+    // ── EQUIPAS (consulta) ───────────────────────────────────────
+    async function loadEquipas() {
+        document.getElementById('current-view-title').innerText = 'Equipas';
+        showLoader();
+        const dados = await apiCall('/equipas');
+        document.getElementById('view-container').innerHTML = `
+        <div class="section-card">
+            <div class="section-header"><h2>Equipas em Competição</h2></div>
+            <div class="table-responsive">
+                <table class="table-hub">
+                    <thead><tr><th>ID</th><th>Nome</th><th>Sigla</th><th>Localidade</th></tr></thead>
+                    <tbody>${dados.map(e => `<tr><td>${e.id}</td><td><strong>${e.nome}</strong></td><td><span class="badge badge-primary">${e.sigla}</span></td><td>${e.localidade}</td></tr>`).join('') || emptyRow(4,'fa-layer-group','Nenhuma equipa.')}</tbody>
+                </table>
+            </div>
+        </div>`;
+    }
+
+    // ── INSCRIÇÕES ───────────────────────────────────────────────
+    async function loadInscricoes() {
+        document.getElementById('current-view-title').innerText = 'Inscrições';
+        showLoader();
+        const [inscricoes, equipas, eventos] = await Promise.all([apiCall('/inscricoes'), apiCall('/equipas'), apiCall('/eventos')]);
+        const optEq = equipas.map(e => `<option value="${e.id}">${e.nome}</option>`).join('');
+        const optEv = eventos.map(ev => `<option value="${ev.id}">${ev.nome}</option>`).join('');
+        window._equipas = equipas; window._eventos = eventos;
+        document.getElementById('view-container').innerHTML = `
+        <div class="section-card">
+            <div class="section-header"><h2>Inscrever Equipa em Evento</h2></div>
+            <form id="form-inscricao" onsubmit="submitInscricao(event)">
+                <div class="flex-form-row">
+                    <div class="modal-form-group"><label>Equipa</label><select id="ins-equipa">${optEq}</select></div>
+                    <div class="modal-form-group"><label>Evento</label><select id="ins-evento">${optEv}</select></div>
+                    <div class="modal-form-group"><label>Data (AAAA-MM-DD)</label><input type="text" id="ins-data" placeholder="2025-06-01" required></div>
+                </div>
+                <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> Inscrever</button>
+            </form>
+        </div>
+        <div class="section-card">
+            <div class="section-header"><h2>Inscrições Ativas</h2></div>
+            <div class="table-responsive">
+                <table class="table-hub">
+                    <thead><tr><th>ID</th><th>Equipa</th><th>Evento</th><th>Data</th><th>Ações</th></tr></thead>
+                    <tbody id="tbody-inscricoes">${renderInscricoes(inscricoes, equipas, eventos)}</tbody>
+                </table>
+            </div>
+        </div>`;
+    }
+
+    function renderInscricoes(dados, equipas, eventos) {
+        if (!dados || !dados.length) return emptyRow(5, 'fa-clipboard-check', 'Nenhuma inscrição registada.');
+        return dados.map(i => {
+            const eq = (equipas || window._equipas).find(e => e.id === i.equipaId)?.nome || `Equipa #${i.equipaId}`;
+            const ev = (eventos || window._eventos).find(ev => ev.id === i.eventoId)?.nome || `Evento #${i.eventoId}`;
+            return `<tr>
+            <td>${i.id}</td><td><strong>${eq}</strong></td><td>${ev}</td><td>${i.dataInscricao}</td>
+            <td class="actions-cell"><button class="btn-icon delete" onclick="deleteInscricao(${i.id})"><i class="fa-solid fa-trash"></i></button></td>
+        </tr>`;
+        }).join('');
+    }
+
+    async function submitInscricao(e) {
+        e.preventDefault();
+        try {
+            await apiCall('/inscricoes', 'POST', {
+                equipaId: parseInt(document.getElementById('ins-equipa').value, 10),
+                eventoId: parseInt(document.getElementById('ins-evento').value, 10),
+                dataInscricao: document.getElementById('ins-data').value
+            });
+            e.target.reset();
+            const [dados, equipas, eventos] = await Promise.all([apiCall('/inscricoes'), apiCall('/equipas'), apiCall('/eventos')]);
+            window._equipas = equipas; window._eventos = eventos;
+            document.getElementById('tbody-inscricoes').innerHTML = renderInscricoes(dados, equipas, eventos);
+        } catch (error) {
+            console.error("Erro ao realizar inscrição:", error);
+            e.target.reset();
+            const [dados, equipas, eventos] = await Promise.all([apiCall('/inscricoes').catch(()=>[]), apiCall('/equipas').catch(()=>[]), apiCall('/eventos').catch(()=>[])]);
+            document.getElementById('tbody-inscricoes').innerHTML = renderInscricoes(dados, equipas, eventos);
+        }
+    }
+
+    async function deleteInscricao(id) {
+        if (!confirm('Eliminar esta inscrição?')) return;
+        try {
+            await apiCall(`/inscricoes/${id}`, 'DELETE');
+            const [dados] = await Promise.all([apiCall('/inscricoes')]);
+            document.getElementById('tbody-inscricoes').innerHTML = renderInscricoes(dados, window._equipas, window._eventos);
+        } catch (error) {
+            console.error("Erro ao remover inscrição:", error);
+            const [dados] = await Promise.all([apiCall('/inscricoes').catch(()=>[])]);
+            document.getElementById('tbody-inscricoes').innerHTML = renderInscricoes(dados, window._equipas, window._eventos);
+        }
+    }
+
+    // ── JOGOS ────────────────────────────────────────────────────
+    async function loadJogos() {
+        document.getElementById('current-view-title').innerText = 'Jogos & Calendário';
+        showLoader();
+        const [jogos, equipas, eventos, pavilhoes] = await Promise.all([apiCall('/jogos'), apiCall('/equipas'), apiCall('/eventos'), apiCall('/pavilhoes')]);
+        const cards = renderJogoCards(jogos, equipas, eventos, pavilhoes);
+        document.getElementById('view-container').innerHTML = `
+        <div class="section-card">
+            <div class="section-header"><h2>Calendário de Jogos</h2></div>
+            <div id="jogos-container">${cards || '<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><p>Nenhum jogo agendado.</p></div>'}</div>
+        </div>`;
+    }
+
+    function renderJogoCards(jogos, equipas, eventos, pavilhoes) {
+        if (!jogos || !jogos.length) return '';
+        return jogos.map(j => {
+            const ev = eventos.find(ev => ev.id === j.eventoId)?.nome || `Evento #${j.eventoId}`;
+            const casa = equipas.find(e => e.id === j.equipaCasaId)?.nome || `Equipa #${j.equipaCasaId}`;
+            const fora = j.equipaForaId ? (equipas.find(e => e.id === j.equipaForaId)?.nome || `Equipa #${j.equipaForaId}`) : 'BYE';
+            const pav = pavilhoes.find(p => p.id === j.pavilhaoId)?.nome || `Pavilhão #${j.pavilhaoId}`;
+            const estadoBadge = j.estado === 'CONCLUIDO' ? '<span class="badge badge-success">Concluído</span>' : j.estado === 'CANCELADO' ? '<span class="badge badge-danger">Cancelado</span>' : '<span class="badge">Agendado</span>';
+            return `<div class="jogo-card">
+            <div>
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">${ev} · Ronda ${j.ronda}</div>
+                <div style="display:flex;align-items:center;gap:4px;"><span class="jogo-equipa">${casa}</span><span class="jogo-vs">vs</span><span class="jogo-equipa">${fora}</span></div>
+            </div>
+            <div class="jogo-resultado">${j.pontosCasa} — ${j.pontosFora}</div>
+            <div class="jogo-meta">
+                <span><i class="fa-solid fa-clock" style="margin-right:4px;"></i>${j.dataHora}</span>
+                <span><i class="fa-solid fa-location-dot" style="margin-right:4px;"></i>${pav}</span>
+                <span>${estadoBadge}</span>
+            </div>
+        </div>`;
+        }).join('');
+    }
+
+    // ── ESTATÍSTICAS ─────────────────────────────────────────────
+    async function loadEstatisticas() {
+        document.getElementById('current-view-title').innerText = 'Estatísticas';
+        showLoader();
+        const [jogos, equipas, classificacoes] = await Promise.all([apiCall('/jogos'), apiCall('/equipas'), apiCall('/classificacoes/geral')]);
+        const totalJogos = jogos.length;
+        const totalVitorias = classificacoes.reduce((s, c) => s + (c.vitorias || 0), 0);
+        const totalDerrotas = classificacoes.reduce((s, c) => s + (c.derrotas || 0), 0);
+        const totalPontos = classificacoes.reduce((s, c) => s + (c.pontosMarcados || 0), 0);
+        const pctVit = totalJogos > 0 ? Math.round((totalVitorias / totalJogos) * 100) : 0;
+        const rowsEq = classificacoes.map((c, i) => {
+            const eq = equipas.find(e => e.id === c.equipaId)?.nome || `Equipa #${c.equipaId}`;
+            return `<tr><td><strong>${i+1}º</strong></td><td><strong>${eq}</strong></td><td>${c.jogos}</td><td>${c.vitorias}</td><td>${c.derrotas}</td><td><code>${c.pontosMarcados}:${c.pontosSofridos}</code></td><td>${c.saldo > 0 ? '+'+c.saldo : c.saldo}</td><td><span class="badge badge-success">${c.pontos} Pts</span></td></tr>`;
+        }).join('');
+        document.getElementById('view-container').innerHTML = `
+        <div class="stats-grid">
+            <div class="stat-box"><div class="num">${totalJogos}</div><div class="lbl">Jogos Totais</div></div>
+            <div class="stat-box"><div class="num" style="color:var(--success);">${totalVitorias}</div><div class="lbl">Vitórias</div></div>
+            <div class="stat-box"><div class="num" style="color:var(--danger);">${totalDerrotas}</div><div class="lbl">Derrotas</div></div>
+            <div class="stat-box"><div class="num">${totalPontos}</div><div class="lbl">Pontos Marcados</div></div>
+            <div class="stat-box"><div class="num">${pctVit}%</div><div class="lbl">% Vitórias</div></div>
+        </div>
+        <div class="section-card">
+            <div class="section-header"><h2>Estatísticas por Equipa</h2></div>
+            <div class="table-responsive">
+                <table class="table-hub">
+                    <thead><tr><th>Pos</th><th>Equipa</th><th>J</th><th>V</th><th>D</th><th>Pts Marcados:Sofridos</th><th>+/-</th><th>Pontuação</th></tr></thead>
+                    <tbody>${rowsEq || emptyRow(8,'fa-chart-bar','Sem dados estatísticos.')}</tbody>
+                </table>
+            </div>
+        </div>`;
+    }
+
+    // ── CLASSIFICAÇÕES ───────────────────────────────────────────
+    async function loadClassificacoes() {
+        document.getElementById('current-view-title').innerText = 'Classificações';
+        showLoader();
+        const [dados, equipas] = await Promise.all([apiCall('/classificacoes/geral'), apiCall('/equipas')]);
+        const rows = dados.map((c, i) => {
+            const eq = equipas.find(e => e.id === c.equipaId)?.nome || `Equipa #${c.equipaId}`;
+            return `<tr><td><strong>${i+1}º</strong></td><td><strong>${eq}</strong></td><td>${c.jogos}</td><td>${c.vitorias}</td><td>${c.derrotas}</td><td><code>${c.pontosMarcados}:${c.pontosSofridos}</code></td><td>${c.saldo > 0 ? '+'+c.saldo : c.saldo}</td><td><span class="badge badge-success">${c.pontos} Pts</span></td></tr>`;
+        }).join('');
+        document.getElementById('view-container').innerHTML = `
+        <div class="section-card">
+            <div class="section-header"><h2>Tabela Classificativa Geral</h2></div>
+            <div class="table-responsive">
+                <table class="table-hub">
+                    <thead><tr><th>Pos</th><th>Equipa</th><th>J</th><th>V</th><th>D</th><th>Marcados:Sofridos</th><th>+/-</th><th>Pontuação</th></tr></thead>
+                    <tbody>${rows || emptyRow(8,'fa-ranking-star','Sem dados de classificação.')}</tbody>
+                </table>
+            </div>
+        </div>`;
+    }
+
+    // ── HELPER: atualiza apenas o tbody via novo fetch ───────────
+    async function refreshTbody(tbodyId, endpoint, renderFn) {
+        const dados = await apiCall(endpoint);
+        const el = document.getElementById(tbodyId);
+        if (el) el.innerHTML = renderFn(dados);
+    }
+
+    switchTab('dashboard');
+</script>
+</body>
+</html>
