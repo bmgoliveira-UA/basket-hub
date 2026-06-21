@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.flow.toList
 import com.est.Evento.EventoService
+import org.jetbrains.exposed.v1.core.ReferenceOption
 
 @Serializable
 data class Patrocinador(
@@ -45,7 +46,7 @@ class PatrocinadorService(val database: R2dbcDatabase) {
         val valorContrato = double("valor_contrato")
 
         // Foreign Key para Eventos (nullable porque pode nao patrocinar um evento especifico)
-        val eventoId = reference("evento_id", EventoService.Eventos.id).nullable()
+        val eventoId = reference("evento_id", EventoService.Eventos.id, onDelete = ReferenceOption.CASCADE).nullable()
 
         override val primaryKey = PrimaryKey(id)
     }
