@@ -14,6 +14,7 @@ import com.est.Evento.EventoService
 import com.est.Equipa.EquipaService
 import com.est.Pavilhao.PavilhaoService
 import com.est.Repository.Repository
+import org.jetbrains.exposed.v1.core.ReferenceOption
 
 @Serializable
 data class Jogo(
@@ -44,8 +45,8 @@ class JogoService(val database: R2dbcDatabase) : Repository<Jogo, Int> {
         // Multiplas Foreign Keys mapeadas corretamente
         val eventoId = reference("evento_id", EventoService.Eventos.id)
         val ronda = integer("ronda").default(1)
-        val equipaCasaId = reference("equipa_casa_id", EquipaService.Equipas.id)
-        val equipaForaId = reference("equipa_fora_id", EquipaService.Equipas.id).nullable()
+        val equipaCasaId = reference("equipa_casa_id", EquipaService.Equipas.id, onDelete = ReferenceOption.CASCADE)
+        val equipaForaId = reference("equipa_fora_id", EquipaService.Equipas.id, onDelete = ReferenceOption.CASCADE).nullable()
         val pavilhaoId = reference("pavilhao_id", PavilhaoService.Pavilhoes.id)
 
         val pontosCasa = integer("pontos_casa")

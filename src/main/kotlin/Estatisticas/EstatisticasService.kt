@@ -10,6 +10,7 @@ import com.est.Jogador.JogadorService
 import com.est.Equipa.EquipaService
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import org.jetbrains.exposed.v1.core.ReferenceOption
 
 @Serializable
 data class Estatisticas(
@@ -26,8 +27,8 @@ class EstatisticasService(val database: R2dbcDatabase) {
 
     object EstatisticasTabela : Table("estatisticas") {
         val id = integer("id").autoIncrement()
-        val jogadorId = reference("jogador_id", JogadorService.Jogadores.id)
-        val equipaId = reference("equipa_id", EquipaService.Equipas.id)
+        val jogadorId = reference("jogador_id", JogadorService.Jogadores.id, onDelete = ReferenceOption.CASCADE)
+        val equipaId = reference("equipa_id", EquipaService.Equipas.id, onDelete = ReferenceOption.CASCADE)
         val pontos = integer("pontos")
         val assistencias = integer("assistencias")
         val rebounds = integer("rebounds")

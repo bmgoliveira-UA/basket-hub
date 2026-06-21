@@ -31,7 +31,16 @@
             color: var(--text-main);
         }
 
-        h1 { margin-bottom: 2rem; }
+        .logo {
+            margin-bottom: 4rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .logo img {
+            max-width: 25%;
+            height: auto;
+        }
 
         .role-grid {
             display: flex;
@@ -39,7 +48,6 @@
             width: 90%;
             max-width: 900px;
             justify-content: center;
-            vertical-align: center;
         }
 
         .role-card {
@@ -70,7 +78,9 @@
 </head>
 <body>
 
-<h1>BasketHub</h1>
+<div class="logo">
+    <img src="/utils/logo.png" alt="Logo">
+</div>
 <p style="margin-bottom: 30px; color: var(--text-muted);">Selecione o seu perfil de visualização para continuar</p>
 
 <div class="role-grid">
@@ -95,7 +105,27 @@
 <script>
     function entrar(role) {
         localStorage.setItem("role", role);
-        window.location.href = "/dashboard";
+
+        switch(role) {
+            case "JOGADOR":
+                window.location.href = "/jogador";
+                break;
+
+            case "ORGANIZADOR":
+                window.location.href = "/organizador";
+                break;
+
+            case "PATROCINADOR":
+                window.location.href = "/patrocinadores";
+                break;
+
+            case "ADMINISTRADOR":
+                window.location.href = "/publico";
+                break;
+
+            default:
+                window.location.href = "/";
+        }
     }
 </script>
 </body>

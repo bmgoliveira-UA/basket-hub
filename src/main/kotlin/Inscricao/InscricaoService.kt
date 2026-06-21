@@ -11,14 +11,37 @@ import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.flow.toList
 import com.est.Equipa.EquipaService
 import com.est.Evento.EventoService
+import org.jetbrains.exposed.v1.core.ReferenceOption
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 @Serializable
 data class Inscricao(
     val id: Int? = null,
     val equipaId: Int,
     val eventoId: Int,
-    val dataInscricao: String
-)
+    val dataInscricao: String // Mantido como String
+) {
+    init {
+        // 1. Defina o padrão que você exige (Exemplo: 21/06/2026 15:30:00)
+        val formatoEsperado = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+
+        // 2. O require tenta parsear a data. Se falhar, lança a exceção.
+        require(isValidDate(dataInscricao, formatoEsperado)) {
+            "A dataInscricao deve estar no formato 'yyyy/MM/dd'. Valor recebido: $dataInscricao"
+        }
+    }
+}
+
+// Função auxiliar para validar o formato
+private fun isValidDate(dateStr: String, formatter: DateTimeFormatter): Boolean {
+    return try {
+        formatter.parse(dateStr)
+        true
+    } catch (e: DateTimeParseException) {
+        false
+    }
+}
 
 class InscricaoService(val database: R2dbcDatabase) {
 
@@ -26,8 +49,8 @@ class InscricaoService(val database: R2dbcDatabase) {
         val id = integer("id").autoIncrement()
 
         // Foreign Keys obrigando a existir a Equipa e o Evento
-        val equipaId = reference("equipa_id", EquipaService.Equipas.id)
-        val eventoId = reference("evento_id", EventoService.Eventos.id)
+        val equipaId = reference("equipa_id", EquipaService.Equipas.id, onDelete = ReferenceOption.CASCADE)
+        val eventoId = reference("evento_id", EventoService.Eventos.id, onDelete = ReferenceOption.CASCADE)
         val dataInscricao = varchar("data_inscricao", 20)
 
         override val primaryKey = PrimaryKey(id)

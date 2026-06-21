@@ -18,7 +18,23 @@ data class Patrocinador(
     val empresa: String,
     val valorContrato: Double,
     val eventoId: Int? = null
-)
+) {
+    init {
+        // Converte para String e remove zeros extras no final
+        val stringValue = valorContrato.toString()
+        val partes = stringValue.split(".")
+
+        // Se houver parte decimal, verifica se ela tem mais de 2 dígitos
+        if (partes.size > 1) {
+            val parteDecimal = partes[1]
+            // O Kotlin por padrão adiciona .0 para doubles inteiros (ex: 100.0)
+            // Ignoramos se for apenas um único zero.
+            require(parteDecimal.length <= 2 || (parteDecimal.length == 1 && parteDecimal == "0")) {
+                "O valor do contrato deve ter no máximo 2 casas decimais. Valor recebido: $valorContrato"
+            }
+        }
+    }
+}
 
 class PatrocinadorService(val database: R2dbcDatabase) {
 

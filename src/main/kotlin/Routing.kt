@@ -32,6 +32,6 @@ fun Application.configureRouting() {
         }
 
         // Ficheiros estáticos (CSS, JS)
-        staticResources("/static", "static")
+        staticResources("/", "static")
     }
 }

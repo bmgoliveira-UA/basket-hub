@@ -1,6 +1,6 @@
 /**
  * BasketHub - Administração Avançada UI & Integração API
- */
+ * */
 
 document.addEventListener("DOMContentLoaded", () => {
     const role = localStorage.getItem('role');
@@ -49,11 +49,15 @@ const viewTitle = document.getElementById('current-view-title');
 
 // 1. Motor de Comunicação com Validação de Formato de Resposta
 async function apiCall(url, method = 'GET', data = null) {
-    const role = localStorage.getItem('role') || 'JOGADOR';
+    const role = localStorage.getItem('role');
+
+if (!role) {
+    window.location.href = '/index.html';
+}
 
     // Injeta a role automaticamente na URL para garantir segurança no backend
-    const separator = url.includes('?') ? '&' : '?';
     let cleanUrl = url.replace(/([?&])perfil=[^&]*(&|$)/, '$1').replace(/&$/, '').replace(/\?$/, '');
+    const separator = cleanUrl.includes('?') ? '&' : '?';
     const finalUrl = `${cleanUrl}${separator}role=${role}`;
 
     const config = {
@@ -77,7 +81,8 @@ async function apiCall(url, method = 'GET', data = null) {
         }
 
         if (contentType.includes("text/html")) {
-            throw new Error("O servidor devolveu uma página HTML em vez de dados JSON. Verifique se o endpoint existe no Ktor.");
+            throw new Error("O servidor devolveu uma página HTML em vez de dados JSON. " +
+                "Verifique se o endpoint existe no Ktor.");
         }
 
         if (response.status === 204 || response.headers.get('content-length') === '0') {
@@ -108,7 +113,11 @@ const MatrizAcesso = {
 };
 
 async function switchTab(tab) {
-    const role = localStorage.getItem('role') || 'JOGADOR';
+    const role = localStorage.getItem('role');
+
+if (!role) {
+    window.location.href = '/index.html';
+}
 
     // 1. Verificação de segurança (Matriz de Acesso)
     if (!MatrizAcesso[role] || !MatrizAcesso[role].includes(tab)) {
@@ -447,7 +456,7 @@ async function loadOrganizadores() {
                 <td>${o.contacto}</td>
                 <td>${o.email}</td>
                 <td class="actions-cell">
-                    <button class="btn-icon delete" onclick="deleteItem('/organizador/${o.id}', loadOrganizadores)"><i class="fa-solid fa-trash"></i></button>
+                    <button class="btn-icon delete" onclick="deleteItem('/organizadores/${o.id}', loadOrganizadores)"><i class="fa-solid fa-trash"></i></button>
                 </td>
             </tr>
         `).join('');
